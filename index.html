@@ -21,7 +21,6 @@
       padding: 2rem;
       position: relative;
     }
-    /* Version badge */
     .version {
       position: absolute;
       top: 1rem;
@@ -87,20 +86,15 @@
   <h1>My Latest Roblox Games</h1>
   <div class="grid" id="grid"></div>
   <script>
-    // Proxy helper for CORS
     const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
-
-    // Endpoint for games list
     const GAMES_API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
 
-    // Fetch games via proxy
     async function fetchGames() {
       const res = await fetch(proxy(GAMES_API), { cache: 'no-store' });
       if (!res.ok) throw new Error('Games HTTP ' + res.status);
       return res.json();
     }
 
-    // Fetch thumbnail via proxy, repeat until non-empty URL
     async function fetchThumbnail(placeId) {
       const raw = `https://thumbnails.roblox.com/v1/assets?assetIds=${placeId}&size=768x432&format=Png&isCircular=false`;
       const url = proxy(raw);
@@ -114,14 +108,11 @@
               imgUrl = json.data[0].imageUrl;
             }
           }
-        } catch {
-          // ignore and retry
-        }
+        } catch {}
       }
       return imgUrl;
     }
 
-    // Create a 3D parallax card
     function createCard(game, imgUrl) {
       const card = document.createElement('div'); card.className = 'card';
       const inner = document.createElement('div'); inner.className = 'inner';
@@ -154,15 +145,22 @@
       return card;
     }
 
-    // Initialize and render
     async function init() {
       try {
         const data = await fetchGames();
-        const games = Array.isArray(data.data) ? data.data.slice(0, 3) : [];
+        const games = Array.isArray(data.data) ? data.data : [];
         const grid = document.getElementById('grid');
-        for (const game of games) {
-          const thumbUrl = await fetchThumbnail(game.rootPlace.id);
-          grid.appendChild(createCard(game, thumbUrl));
+        const cards = games.map(game => {
+          const card = createCard(game, 'https://via.placeholder.com/768x432?text=Loading...');
+          grid.appendChild(card);
+          return { card, game };
+        });
+        for (const { card, game } of cards) {
+          try {
+            const thumbUrl = await fetchThumbnail(game.rootPlace.id);
+            const img = card.querySelector('img');
+            img.src = thumbUrl;
+          } catch {}
         }
       } catch (e) {
         console.error(e);
