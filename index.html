@@ -101,7 +101,7 @@
 
       const img = document.createElement('img');
       // Use Roblox CDN thumbnail endpoint directly (no CORS)
-      img.src = `https://www.roblox.com/asset-thumbnail/image?assetId=${game.rootPlace.id}&width=768&height=432&format=png`;
+      img.src = `https://tr.rbxcdn.com/${game.rootPlace.id}/768/432/Thumbnail/PNG`;
       img.onerror = () => img.src = 'https://via.placeholder.com/768x432?text=No+Image';
 
       const info = document.createElement('div'); info.className = 'info';
