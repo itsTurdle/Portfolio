@@ -6,7 +6,7 @@
   <title>Roblox Games Portfolio</title>
   <style>
     :root { --grad: radial-gradient(circle at 20% 30%, #00faff 0%, #3a8cff 40%, #715bff 70%, #c440ff 100%); }
-    @keyframes bgShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    @keyframes bgShift { 0% { background-position:0% 50%; } 50% { background-position:100% 50%; } 100% { background-position:0% 50%; } }
     body {
       margin: 0;
       font-family: system-ui, Arial, sans-serif;
@@ -20,6 +20,7 @@
       min-height: 100vh;
       padding: 2rem;
       position: relative;
+      overflow-x: hidden;
     }
     .version {
       position: absolute;
@@ -33,27 +34,71 @@
       color: #333;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    h1 {
-      margin-bottom: 1rem;
+    header {
       text-align: center;
+      margin-bottom: 2rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    header.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    header h1 {
+      font-size: 2.5rem;
       color: #fff;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+      margin: 0;
+    }
+    .skills-list {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+      text-align: left;
+      display: inline-block;
+    }
+    .skills-list li {
+      position: relative;
+      padding-left: 1.5em;
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+      color: #eee;
+    }
+    .skills-list li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: #fff;
+      font-size: 1.2em;
+      line-height: 1;
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(2, minmax(280px,1fr));
       gap: 1.5rem;
       width: 100%;
       max-width: 1200px;
+      margin-top: 1rem;
     }
-    .card { perspective: 1000px; }
+    @media(max-width:600px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      perspective: 1000px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
     .inner {
       position: relative;
       overflow: hidden;
       border-radius: 16px;
-      background: rgba(255, 255, 255, 0.55);
+      background: rgba(255,255,255,0.55);
       backdrop-filter: blur(10px);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
       transform-style: preserve-3d;
       transition: transform 0.2s ease;
     }
@@ -76,25 +121,34 @@
       color: #333;
       border-radius: 999px;
       text-decoration: none;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
     }
     .error { text-align: center; color: #e00; margin-top: 2rem; }
   </style>
 </head>
 <body>
   <div class="version">v1.0.0</div>
-  <h1>My Latest Roblox Games</h1>
+  <header id="intro">
+    <h1>I'm turdle, a Scripter</h1>
+    <ul class="skills-list">
+      <li>I have logged over 12,000 hours crafting scripts for diverse applications.</li>
+      <li>I specialize in designing intuitive user interfaces and robust backend systems.</li>
+      <li>I excel at building environments, developing UI layouts, and managing server infrastructure.</li>
+      <li>I operate on a flexible schedule, working primarily in the Eastern Time Zone.</li>
+      <li>I focus my work on backend logic and user interface design, rather than combat mechanics.</li>
+    </ul>
+  </header>
   <div class="grid" id="grid"></div>
   <script>
     const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
-    // API only supports limits of 10,25,50,100
     const GAMES_API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
     const RENDER_LIMIT = 4;
     const VERSION_KEY = 'portfolioVersion';
+    const THUMB_CACHE_KEY = 'thumbCache';
+    const sleep = ms => new Promise(res => setTimeout(res, ms));
 
     function updateVersion() {
-      let version = localStorage.getItem(VERSION_KEY);
-      if (!version) version = '1.0.0';
+      let version = localstorage.getItem(VERSION_KEY) || '1.0.0';
       const parts = version.split('.').map(n => parseInt(n, 10));
       parts[2] = (parts[2] || 0) + 1;
       const newVer = parts.join('.');
@@ -109,6 +163,8 @@
     }
 
     async function fetchThumbnail(placeId) {
+      const cache = JSON.parse(localStorage.getItem(THUMB_CACHE_KEY) || '{}');
+      if (cache[placeId]) return cache[placeId];
       const raw = `https://thumbnails.roblox.com/v1/assets?assetIds=${placeId}&size=768x432&format=Png&isCircular=false`;
       const url = proxy(raw);
       let imgUrl = '';
@@ -121,13 +177,14 @@
           }
         } catch {}
       }
+      cache[placeId] = imgUrl;
+      localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(cache));
       return imgUrl;
     }
 
     function createCard(game, imgUrl) {
       const card = document.createElement('div'); card.className = 'card';
       const inner = document.createElement('div'); inner.className = 'inner';
-
       inner.addEventListener('mousemove', e => {
         const r = inner.getBoundingClientRect();
         const dx = ((e.clientX - r.left) / r.width - 0.5) * 20;
@@ -135,46 +192,33 @@
         inner.style.transform = `rotateY(${dx}deg) rotateX(${dy}deg)`;
       });
       inner.addEventListener('mouseleave', () => inner.style.transform = 'rotateY(0) rotateX(0)');
-
-      const img = document.createElement('img');
-      img.src = imgUrl;
-      img.onerror = () => img.src = 'https://via.placeholder.com/768x432?text=No+Image';
-
+      const img = document.createElement('img'); img.src = imgUrl; img.onerror = () => img.src = 'https://via.placeholder.com/768x432?text=No+Image';
       const info = document.createElement('div'); info.className = 'info';
       info.innerHTML = `
         <h3>${game.name}</h3>
         <p>${(game.description || 'No description').slice(0, 90)}</p>
         <div class="visits">👁️ ${game.placeVisits.toLocaleString()} visits</div>
       `;
-      const link = document.createElement('a');
-      link.href = `https://www.roblox.com/games/${game.rootPlace.id}`;
-      link.target = '_blank'; link.rel = 'noopener'; link.textContent = 'Play';
-      info.appendChild(link);
-
-      inner.append(img, info);
-      card.appendChild(inner);
+      const link = document.createElement('a'); link.href = `https://www.roblox.com/games/${game.rootPlace.id}`; link.target = '_blank'; link.rel = 'noopener'; link.textContent = 'Play'; info.appendChild(link);
+      inner.append(img, info); card.appendChild(inner);
       return card;
     }
 
     async function init() {
       updateVersion();
+      const intro = document.getElementById('intro');
+      const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) intro.classList.add('visible'), io.disconnect(); });
+      io.observe(intro);
       try {
         const data = await fetchGames();
-        let games = Array.isArray(data.data) ? data.data : [];
-        games = games.slice(0, RENDER_LIMIT);  // hard render limit
+        const games = Array.isArray(data.data) ? data.data.slice(0, RENDER_LIMIT) : [];
         const grid = document.getElementById('grid');
-
-        const cards = games.map(game => {
-          const card = createCard(game, 'https://via.placeholder.com/768x432?text=Loading...');
-          grid.appendChild(card);
-          return { card, game };
-        });
-
-        for (const { card, game } of cards) {
-          try {
-            const thumbUrl = await fetchThumbnail(game.rootPlace.id);
-            card.querySelector('img').src = thumbUrl;
-          } catch {}
+        for (const game of games) {
+          const card = grid.appendChild(createCard(game, 'https://via.placeholder.com/768x432?text=Loading...'));
+          const imgElem = card.querySelector('img');
+          const thumbUrl = await fetchThumbnail(game.rootPlace.id);
+          imgElem.src = thumbUrl;
+          await sleep(1000);
         }
       } catch (e) {
         console.error(e);
