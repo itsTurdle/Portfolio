@@ -92,15 +92,11 @@
     const GAMES_API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
 
     async function fetchGames() {
-      try {
-        const res = await fetch(GAMES_API, { cache: 'no-store' });
-        if (res.ok) return res.json();
-      } catch {}
-      // Fallback to proxy if direct fails
       const proxyRes = await fetch(proxy(GAMES_API), { cache: 'no-store' });
       if (!proxyRes.ok) throw new Error('Games HTTP ' + proxyRes.status);
       return proxyRes.json();
     }
+
 
     function createCard(game) {
       const card = document.createElement('div'); card.className = 'card';
