@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roblox Games Portfolio</title>
+  <style>
+    :root { --grad: radial-gradient(circle at 20% 30%, #00faff 0%, #3a8cff 40%, #715bff 70%, #c440ff 100%); }
+    @keyframes bgShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    body {
+      margin: 0;
+      font-family: system-ui, Arial, sans-serif;
+      color: #333;
+      background: var(--grad);
+      background-size: 300% 300%;
+      animation: bgShift 6s linear infinite;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1200px;
+    }
+    .card { perspective: 1000px; }
+    .inner {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+      transform-style: preserve-3d;
+      transition: transform 0.2s ease;
+    }
+    .inner img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      transform: translateZ(20px);
+      display: block;
+    }
+    .info { padding: 1rem; transform: translateZ(40px); }
+    .info h3 { margin: 0 0 0.5rem; font-size: 1.2rem; color: #111; }
+    .info p { margin: 0 0 0.5rem; font-size: 0.9rem; color: #222; }
+    .visits { font-size: 0.85rem; color: #444; }
+    .info a {
+      display: inline-block;
+      margin-top: 0.4rem;
+      padding: 0.45rem 1rem;
+      background: #fff;
+      color: #333;
+      border-radius: 999px;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    }
+    .error { text-align: center; color: #e00; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <h1>My Latest Roblox Games</h1>
+  <div class="grid" id="grid"></div>
+  <script>
+    // Helper for CORS on the games list only
+    const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
+    const GAMES_API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
+
+    async function fetchGames() {
+      try {
+        const res = await fetch(GAMES_API, { cache: 'no-store' });
+        if (res.ok) return res.json();
+      } catch {}
+      // Fallback to proxy if direct fails
+      const proxyRes = await fetch(proxy(GAMES_API), { cache: 'no-store' });
+      if (!proxyRes.ok) throw new Error('Games HTTP ' + proxyRes.status);
+      return proxyRes.json();
+    }
+
+    function createCard(game) {
+      const card = document.createElement('div'); card.className = 'card';
+      const inner = document.createElement('div'); inner.className = 'inner';
+
+      inner.addEventListener('mousemove', e => {
+        const r = inner.getBoundingClientRect();
+        const dx = ((e.clientX - r.left) / r.width - 0.5) * 20;
+        const dy = ((e.clientY - r.top) / r.height - 0.5) * -20;
+        inner.style.transform = `rotateY(${dx}deg) rotateX(${dy}deg)`;
+      });
+      inner.addEventListener('mouseleave', () => inner.style.transform = 'rotateY(0) rotateX(0)');
+
+      const img = document.createElement('img');
+      // Use Roblox CDN thumbnail endpoint directly (no CORS)
+      img.src = `https://www.roblox.com/asset-thumbnail/image?assetId=${game.rootPlace.id}&width=768&height=432&format=png`;
+      img.onerror = () => img.src = 'https://via.placeholder.com/768x432?text=No+Image';
+
+      const info = document.createElement('div'); info.className = 'info';
+      info.innerHTML = `
+        <h3>${game.name}</h3>
+        <p>${(game.description || 'No description').slice(0, 90)}</p>
+        <div class="visits">👁️ ${game.placeVisits.toLocaleString()} visits</div>
+      `;
+      const link = document.createElement('a'); link.href = `https://www.roblox.com/games/${game.rootPlace.id}`;
+      link.target = '_blank'; link.rel = 'noopener'; link.textContent = 'Play';
+      info.appendChild(link);
+
+      inner.append(img, info);
+      card.appendChild(inner);
+      return card;
+    }
+
+    async function init() {
+      try {
+        const data = await fetchGames();
+        const games = Array.isArray(data.data) ? data.data.slice(0, 3) : [];
+        const grid = document.getElementById('grid');
+        games.forEach(game => grid.appendChild(createCard(game)));
+      } catch (e) {
+        console.error(e);
+        document.body.insertAdjacentHTML('beforeend', `<div class="error">Failed: ${e.message}</div>`);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
