@@ -87,18 +87,42 @@
   <h1>My Latest Roblox Games</h1>
   <div class="grid" id="grid"></div>
   <script>
-    // Helper for CORS on the games list only
+    // Proxy helper for CORS
     const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
+
+    // Endpoint for games list
     const GAMES_API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
 
+    // Fetch games via proxy
     async function fetchGames() {
-      const proxyRes = await fetch(proxy(GAMES_API), { cache: 'no-store' });
-      if (!proxyRes.ok) throw new Error('Games HTTP ' + proxyRes.status);
-      return proxyRes.json();
+      const res = await fetch(proxy(GAMES_API), { cache: 'no-store' });
+      if (!res.ok) throw new Error('Games HTTP ' + res.status);
+      return res.json();
     }
 
+    // Fetch thumbnail via proxy, repeat until non-empty URL
+    async function fetchThumbnail(placeId) {
+      const raw = `https://thumbnails.roblox.com/v1/assets?assetIds=${placeId}&size=768x432&format=Png&isCircular=false`;
+      const url = proxy(raw);
+      let imgUrl = '';
+      while (!imgUrl) {
+        try {
+          const res = await fetch(url, { cache: 'no-store' });
+          if (res.ok) {
+            const json = await res.json();
+            if (Array.isArray(json.data) && json.data[0]?.imageUrl) {
+              imgUrl = json.data[0].imageUrl;
+            }
+          }
+        } catch {
+          // ignore and retry
+        }
+      }
+      return imgUrl;
+    }
 
-    function createCard(game) {
+    // Create a 3D parallax card
+    function createCard(game, imgUrl) {
       const card = document.createElement('div'); card.className = 'card';
       const inner = document.createElement('div'); inner.className = 'inner';
 
@@ -111,8 +135,7 @@
       inner.addEventListener('mouseleave', () => inner.style.transform = 'rotateY(0) rotateX(0)');
 
       const img = document.createElement('img');
-      // Use Roblox CDN thumbnail endpoint directly (no CORS)
-      img.src = `https://tr.rbxcdn.com/${game.rootPlace.id}/768/432/Thumbnail/PNG`;
+      img.src = imgUrl;
       img.onerror = () => img.src = 'https://via.placeholder.com/768x432?text=No+Image';
 
       const info = document.createElement('div'); info.className = 'info';
@@ -121,7 +144,8 @@
         <p>${(game.description || 'No description').slice(0, 90)}</p>
         <div class="visits">👁️ ${game.placeVisits.toLocaleString()} visits</div>
       `;
-      const link = document.createElement('a'); link.href = `https://www.roblox.com/games/${game.rootPlace.id}`;
+      const link = document.createElement('a');
+      link.href = `https://www.roblox.com/games/${game.rootPlace.id}`;
       link.target = '_blank'; link.rel = 'noopener'; link.textContent = 'Play';
       info.appendChild(link);
 
@@ -130,12 +154,16 @@
       return card;
     }
 
+    // Initialize and render
     async function init() {
       try {
         const data = await fetchGames();
         const games = Array.isArray(data.data) ? data.data.slice(0, 3) : [];
         const grid = document.getElementById('grid');
-        games.forEach(game => grid.appendChild(createCard(game)));
+        for (const game of games) {
+          const thumbUrl = await fetchThumbnail(game.rootPlace.id);
+          grid.appendChild(createCard(game, thumbUrl));
+        }
       } catch (e) {
         console.error(e);
         document.body.insertAdjacentHTML('beforeend', `<div class="error">Failed: ${e.message}</div>`);
