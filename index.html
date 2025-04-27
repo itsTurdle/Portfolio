@@ -5,94 +5,121 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roblox Games Portfolio</title>
   <style>
-    :root { --grad: radial-gradient(circle at 20% 30%, #00faff 0%, #3a8cff 40%, #715bff 70%, #c440ff 100%); }
+    :root { --grad: radial-gradient(circle at 20% 30%,#00faff 0%,#3a8cff 40%,#715bff 70%,#c440ff 100%); }
     @keyframes bgShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-    body { margin:0;font-family:system-ui,Arial,sans-serif;color:#333;background:var(--grad);background-size:300% 300%;animation:bgShift 6s linear infinite;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:2rem;position:relative }
-    .version {position:absolute;top:1rem;left:1rem;background:rgba(255,255,255,.8);padding:.25rem .5rem;border-radius:4px;font-size:.9rem;font-weight:500;color:#333;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+    body{margin:0;font-family:system-ui,Arial,sans-serif;color:#333;background:var(--grad);
+         background-size:300% 300%;animation:bgShift 6s linear infinite;display:flex;
+         flex-direction:column;align-items:center;min-height:100vh;padding:2rem;position:relative}
+    .version{position:absolute;top:1rem;left:1rem;background:rgba(255,255,255,.8);padding:.25rem .5rem;
+             border-radius:4px;font-size:.9rem;font-weight:500;box-shadow:0 2px 4px rgba(0,0,0,.1)}
     h1{margin-bottom:1rem;text-align:center;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.4)}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;width:100%;max-width:1200px}
     .card{perspective:1000px}
-    .inner{position:relative;overflow:hidden;border-radius:16px;background:rgba(255,255,255,.55);backdrop-filter:blur(10px);box-shadow:0 10px 24px rgba(0,0,0,.18);transform-style:preserve-3d;transition:transform .2s ease}
+    .inner{position:relative;overflow:hidden;border-radius:16px;background:rgba(255,255,255,.55);
+           backdrop-filter:blur(10px);box-shadow:0 10px 24px rgba(0,0,0,.18);transform-style:preserve-3d;
+           transition:transform .2s ease}
     .inner img{width:100%;height:180px;object-fit:cover;transform:translateZ(20px);display:block}
     .info{padding:1rem;transform:translateZ(40px)}
     .info h3{margin:0 0 .5rem;font-size:1.2rem;color:#111}
     .info p{margin:0 0 .5rem;font-size:.9rem;color:#222}
     .visits{font-size:.85rem;color:#444}
-    .info a{display:inline-block;margin-top:.4rem;padding:.45rem 1rem;background:#fff;color:#333;border-radius:999px;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,.12)}
+    .info a{display:inline-block;margin-top:.4rem;padding:.45rem 1rem;background:#fff;
+            color:#333;border-radius:999px;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,.12)}
     .error{text-align:center;color:#e00;margin-top:2rem}
   </style>
 </head>
 <body>
-  <div class="version">v1.1.0</div>
+  <div class="version">v1.2.0</div>
   <h1>My Latest Roblox Games</h1>
   <div class="grid" id="grid"></div>
+
   <script>
-    /* --- Helpers --- */
-    const proxy = u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}&cb=${Date.now()}`;
-    const GAMES_API='https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
+    /* ---------- CONFIG ---------- */
+    const USER_ID   = 1914390459;
+    const GAMES_API = `https://games.rprxy.xyz/v2/users/${USER_ID}/games?accessFilter=Public&limit=10`;
+    const THUMB_API = pid =>
+      `https://thumbnails.rprxy.xyz/v1/assets?assetIds=${pid}&size=768x432&format=Png&isCircular=false`;
+    const MAX_RETRIES = 20;        // thumbnail attempts
+    const RETRY_DELAY = 150;       // ms between attempts
 
-    /* localStorage keys */
-    const cacheKey = id=>`thumb_${id}`;
+    /* ---------- Helpers ---------- */
+    const sleep  = ms => new Promise(r => setTimeout(r, ms));
+    const key    = id => `thumb_${id}`;
+    const toData = blob => new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
 
-    function dataURLfromBlob(blob){
-      return new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(blob);});
+    /* ---------- Fetch games list ---------- */
+    async function fetchGames() {
+      const res = await fetch(GAMES_API, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`Games HTTP ${res.status}`);
+      return res.json();
     }
 
-    async function fetchGames(){
-      const r=await fetch(proxy(GAMES_API));
-      if(!r.ok)throw new Error('Games HTTP '+r.status);
-      return r.json();
-    }
+    /* ---------- Thumbnail with local cache & bounded retry ---------- */
+    async function getThumb(id) {
+      const cached = localStorage.getItem(key(id));
+      if (cached) return cached;
 
-    /** get thumbnail with local cache, else spam proxy until success then cache */
-    async function getThumbnail(placeId){
-      const cached=localStorage.getItem(cacheKey(placeId));
-      if(cached) return cached;
-      const raw=`https://thumbnails.roblox.com/v1/assets?assetIds=${placeId}&size=768x432&format=Png&isCircular=false`;
-      let url='';
-      while(!url){
-        try{
-          const res=await fetch(proxy(raw));
-          if(res.ok){
-            const j=await res.json();
-            url=(Array.isArray(j.data)&&j.data[0]?.imageUrl)||'';
+      let url = '';
+      for (let i = 0; i < MAX_RETRIES && !url; i++) {
+        try {
+          const r = await fetch(THUMB_API(id), { cache: 'no-store' });
+          if (r.ok) {
+            const j = await r.json();
+            url = j.data?.[0]?.imageUrl || '';
           }
-        }catch{/*retry*/}
+        } catch { /* ignore */ }
+        if (!url) await sleep(RETRY_DELAY);
       }
-      // fetch the image blob, convert to base64, store
-      try{
-        const imgRes=await fetch(url,{mode:'no-cors'});
-        const blob=await imgRes.blob();
-        const dataURL=await dataURLfromBlob(blob);
-        localStorage.setItem(cacheKey(placeId),dataURL);
+      if (!url) return '';                // give up -> placeholder
+
+      try {
+        const img = await fetch(url, { mode: 'no-cors' });
+        const dataURL = await toData(await img.blob());
+        localStorage.setItem(key(id), dataURL);
         return dataURL;
-      }catch{ return url; }
+      } catch { return url; }
     }
 
-    function createCard(game,img){
-      const card=document.createElement('div');card.className='card';
-      const inner=document.createElement('div');inner.className='inner';
-      inner.addEventListener('mousemove',e=>{const r=inner.getBoundingClientRect();const dx=((e.clientX-r.left)/r.width-.5)*20;const dy=((e.clientY-r.top)/r.height-.5)*-20;inner.style.transform=`rotateY(${dx}deg) rotateX(${dy}deg)`;});
-      inner.addEventListener('mouseleave',()=>inner.style.transform='rotateY(0) rotateX(0)');
-      const imgEl=document.createElement('img');imgEl.src=img||'https://via.placeholder.com/768x432?text=No+Image';
-      const info=document.createElement('div');info.className='info';
-      info.innerHTML=`<h3>${game.name}</h3><p>${(game.description||'No description').slice(0,90)}</p><div class='visits'>👁️ ${game.placeVisits.toLocaleString()} visits</div>`;
-      const link=document.createElement('a');link.href=`https://www.roblox.com/games/${game.rootPlace.id}`;link.target='_blank';link.rel='noopener';link.textContent='Play';info.appendChild(link);
-      inner.append(imgEl,info);card.appendChild(inner);return card;
+    /* ---------- Card builder ---------- */
+    function card(game, imgUrl) {
+      const c = document.createElement('div'); c.className = 'card';
+      const inner = document.createElement('div'); inner.className = 'inner';
+      inner.onmousemove = e => {
+        const r = inner.getBoundingClientRect();
+        const dx = ((e.clientX - r.left) / r.width - 0.5) * 20;
+        const dy = ((e.clientY - r.top) / r.height - 0.5) * -20;
+        inner.style.transform = `rotateY(${dx}deg) rotateX(${dy}deg)`;
+      };
+      inner.onmouseleave = () => (inner.style.transform = 'rotateY(0) rotateX(0)');
+
+      const img = document.createElement('img');
+      img.src = imgUrl || 'https://via.placeholder.com/768x432?text=No+Image';
+
+      const info = document.createElement('div'); info.className = 'info';
+      info.innerHTML = `<h3>${game.name}</h3>
+        <p>${(game.description ?? 'No description').slice(0, 90)}</p>
+        <div class="visits">👁️ ${game.placeVisits.toLocaleString()} visits</div>`;
+      const link = document.createElement('a');
+      link.href = `https://www.roblox.com/games/${game.rootPlace.id}`;
+      link.target = '_blank'; link.rel = 'noopener'; link.textContent = 'Play';
+      info.appendChild(link);
+
+      inner.append(img, info); c.appendChild(inner);
+      return c;
     }
 
-    async function init(){
-      try{
-        const data=await fetchGames();
-        const games=Array.isArray(data.data)?data.data.slice(0,3):[];
-        const grid=document.getElementById('grid');
-        for(const g of games){
-          const thumb=await getThumbnail(g.rootPlace.id);
-          grid.appendChild(createCard(g,thumb));
-        }
-      }catch(e){console.error(e);document.body.insertAdjacentHTML('beforeend',`<div class='error'>Failed: ${e.message}</div>`);}
+    /* ---------- Init ---------- */
+    async function init() {
+      try {
+        const list = (await fetchGames()).data?.slice(0, 3) ?? [];
+        const grid = document.getElementById('grid');
+        for (const g of list) grid.appendChild(card(g, await getThumb(g.rootPlace.id)));
+      } catch (e) {
+        console.error(e);
+        document.body.insertAdjacentHTML('beforeend', `<div class="error">Failed: ${e.message}</div>`);
+      }
     }
-    document.addEventListener('DOMContentLoaded',init);
+    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
