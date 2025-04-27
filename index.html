@@ -1,134 +1,82 @@
-<!DOCTYPE html>
+Canvas <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Roblox Games Portfolio</title>
   <style>
-    :root { --grad: radial-gradient(circle at 20% 30%, #00faff 0%, #3a8cff 40%, #715bff 70%, #c440ff 100%); }
-    @keyframes bgShift { 0% { background-position:0% 50%; } 50% { background-position:100% 50%; } 100% { background-position:0% 50%; } }
+    :root {
+      --bg-dark: #0f0f12;
+      --card-bg: rgba(20, 20, 30, 0.7);
+      --text-light: #e0e0e0;
+      --accent: #b536ff;
+      --glow-accent: rgba(181, 54, 255, 0.6);
+      --neon-glow: 0 0 8px var(--accent), 0 0 20px var(--accent);
+    }
     body {
       margin: 0;
       font-family: system-ui, Arial, sans-serif;
-      color: #333;
-      background: var(--grad);
-      background-size: 300% 300%;
-      animation: bgShift 6s linear infinite;
+      background: var(--bg-dark);
+      color: var(--text-light);
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
       padding: 2rem;
-      position: relative;
-      overflow-x: hidden;
-    }
-    .version {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #333;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     header {
       text-align: center;
       margin-bottom: 2rem;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    header.visible {
-      opacity: 1;
-      transform: translateY(0);
     }
     header h1 {
       font-size: 2.5rem;
-      color: #fff;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+      color: var(--accent);
+      text-shadow: var(--neon-glow);
       margin: 0;
     }
-    .skills-list {
-      list-style: none;
-      padding: 0;
-      margin: 1rem 0;
-      text-align: left;
-      display: inline-block;
-    }
-    .skills-list li {
-      position: relative;
-      padding-left: 1.5em;
-      margin-bottom: 0.75rem;
-      font-size: 1rem;
-      color: #eee;
-    }
-    .skills-list li::before {
-      content: '•';
-      position: absolute;
-      left: 0;
+    .skills-list { list-style: none; padding: 0; margin: 1rem 0; text-align: left; display: inline-block; }
+    .skills-list li { position: relative; padding-left: 1.5em; margin-bottom: 0.75rem; font-size: 1rem; color: var(--text-light); text-shadow: 0 0 4px #000; }
+    .skills-list li::before { content: '•'; position: absolute; left: 0; color: var(--accent); font-size: 1.2em; line-height: 1; text-shadow: var(--neon-glow); }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(280px, 1fr)); gap: 1.5rem; width: 100%; max-width: 1200px; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    .card { perspective: 1000px; opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .card.visible { opacity: 1; transform: translateY(0); }
+    .inner { position: relative; overflow: hidden; border-radius: 16px; background: var(--card-bg); box-shadow: 0 0 10px var(--glow-accent); transform-style: preserve-3d; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .inner:hover { box-shadow: 0 0 20px var(--glow-accent); }
+    .inner img { width: 100%; height: 180px; object-fit: cover; transform: translateZ(20px); filter: brightness(1); }
+    .info { padding: 1rem; color: var(--text-light); }
+    .info h3 { margin: 0 0 0.5rem; font-size: 1.2rem; color: var(--accent); text-shadow: var(--neon-glow); }
+    .info p { margin: 0 0 0.5rem; font-size: 0.9rem; color: var(--text-light); }
+    .visits { font-size: 0.85rem; color: var(--text-light); }
+    .info a { display: inline-block; margin-top: 0.4rem; padding: 0.45rem 1rem; background: var(--accent); color: #000; border-radius: 999px; text-decoration: none; box-shadow: var(--neon-glow); transition: box-shadow 0.2s ease; }
+    .info a:hover { box-shadow: 0 0 30px var(--glow-accent); }
+    .contact { margin-top: 2rem; display: flex; gap: 1.5rem; align-items: center; }
+    .contact-item { display: flex; align-items: center; gap: 0.5rem; }
+    .contact-item button, .contact-item a {
+      background: var(--accent);
       color: #fff;
-      font-size: 1.2em;
-      line-height: 1;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(280px,1fr));
-      gap: 1.5rem;
-      width: 100%;
-      max-width: 1200px;
-      margin-top: 1rem;
-    }
-    @media(max-width:600px) { .grid { grid-template-columns: 1fr; } }
-    .card {
-      perspective: 1000px;
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    .card.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .inner {
-      position: relative;
-      overflow: hidden;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.55);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-      transform-style: preserve-3d;
-      transition: transform 0.2s ease;
-    }
-    .inner img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      transform: translateZ(20px);
-      display: block;
-    }
-    .info { padding: 1rem; transform: translateZ(40px); }
-    .info h3 { margin: 0 0 0.5rem; font-size: 1.2rem; color: #111; }
-    .info p { margin: 0 0 0.5rem; font-size: 0.9rem; color: #222; }
-    .visits { font-size: 0.85rem; color: #444; }
-    .info a {
-      display: inline-block;
-      margin-top: 0.4rem;
-      padding: 0.45rem 1rem;
-      background: #fff;
-      color: #333;
+      border: none;
+      padding: 0.6rem 1.2rem;
       border-radius: 999px;
       text-decoration: none;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+      box-shadow: var(--neon-glow);
+      cursor: pointer;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
+    .contact-item button:hover, .contact-item a:hover {
+      box-shadow: 0 0 30px var(--glow-accent);
+      transform: scale(1.05);
+    }
+    .contact-item button:hover, .contact-item a:hover { box-shadow: 0 0 30px var(--glow-accent); }
     .error { text-align: center; color: #e00; margin-top: 2rem; }
   </style>
 </head>
 <body>
-  <div class="version">v1.0.0</div>
-  <header id="intro">
+  <header>
     <h1>I'm turdle, a Scripter</h1>
     <ul class="skills-list">
       <li>I have logged over 12,000 hours crafting scripts for diverse applications.</li>
@@ -139,22 +87,22 @@
     </ul>
   </header>
   <div class="grid" id="grid"></div>
+  <div class="contact">
+    <a href="discord://discord.com/users/862057084103163924" class="contact-item" target="_blank" rel="noopener" title="Open Discord">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.369A19.791 19.791 0 0016.632 3c-.286.48-.608 1.09-.84 1.57-2.435-.365-4.84-.365-7.214 0-.232-.48-.554-1.09-.84-1.57C7.333 3 5.124 3.146 3.683 4.369A21.36 21.36 0 002.16 8.0c1.793-1.083 3.547-1.77 5.24-2.14a13.8 13.8 0 00.271.44c-2.154.643-4.001 1.566-5.12 2.39 0 0 1.1-.65 3.23-1.24a10.37 10.37 0 014.56.005c2.127.59 3.226 1.24 3.226 1.24-1.12-.824-2.963-1.747-5.118-2.39.084-.122.166-.245.248-.368 1.69.37 3.44 1.056 5.231 2.14a21.29 21.29 0 00-1.524-3.66zM8.507 13.528c-.59 0-1.07-.568-1.07-1.26 0-.692.48-1.26 1.07-1.26.59 0 1.071.568 1.071 1.26 0 .692-.48 1.26-1.071 1.26zm7.0 0c-.59 0-1.07-.568-1.07-1.26 0-.692.48-1.26 1.07-1.26.59 0 1.071.568 1.071 1.26 0 .692-.48 1.26-1.071 1.26z"/></svg>
+      Discord
+    </a>
+    <button class="contact-item" id="copyBtn" title="Copy Username">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19 21H9c-1.1 0-2-.9-2-2V7h2v12h10v2zm-3-4H6c-1.1 0-2-.9-2-2V3c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2z"/></svg>
+      its_turdle
+    </button>
+  </div>
   <script>
     const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
     const GAMES_API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
     const RENDER_LIMIT = 4;
-    const VERSION_KEY = 'portfolioVersion';
     const THUMB_CACHE_KEY = 'thumbCache';
     const sleep = ms => new Promise(res => setTimeout(res, ms));
-
-    function updateVersion() {
-      let version = localstorage.getItem(VERSION_KEY) || '1.0.0';
-      const parts = version.split('.').map(n => parseInt(n, 10));
-      parts[2] = (parts[2] || 0) + 1;
-      const newVer = parts.join('.');
-      localStorage.setItem(VERSION_KEY, newVer);
-      document.querySelector('.version').textContent = `v${newVer}`;
-    }
 
     async function fetchGames() {
       const res = await fetch(proxy(GAMES_API), { cache: 'no-store' });
@@ -170,12 +118,16 @@
       let imgUrl = '';
       while (!imgUrl) {
         try {
-          const res = await fetch(url, { cache: 'no-store' });
-          if (res.ok) {
-            const json = await res.json();
-            if (Array.isArray(json.data) && json.data[0]?.imageUrl) imgUrl = json.data[0].imageUrl;
+          const r = await fetch(url, { cache: 'no-store' });
+          if (r.ok) {
+            const j = await r.json();
+            if (Array.isArray(j.data) && j.data[0]?.imageUrl) {
+              imgUrl = j.data[0].imageUrl;
+              break;
+            }
           }
         } catch {}
+        await sleep(1000);
       }
       cache[placeId] = imgUrl;
       localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(cache));
@@ -186,47 +138,30 @@
       const card = document.createElement('div'); card.className = 'card';
       const inner = document.createElement('div'); inner.className = 'inner';
       inner.addEventListener('mousemove', e => {
-        const r = inner.getBoundingClientRect();
-        const dx = ((e.clientX - r.left) / r.width - 0.5) * 20;
-        const dy = ((e.clientY - r.top) / r.height - 0.5) * -20;
+        const r = inner.getBoundingClientRect(); const dx = ((e.clientX - r.left) / r.width - 0.5) * 20; const dy = ((e.clientY - r.top) / r.height - 0.5) * -20;
         inner.style.transform = `rotateY(${dx}deg) rotateX(${dy}deg)`;
       });
       inner.addEventListener('mouseleave', () => inner.style.transform = 'rotateY(0) rotateX(0)');
       const img = document.createElement('img'); img.src = imgUrl; img.onerror = () => img.src = 'https://via.placeholder.com/768x432?text=No+Image';
       const info = document.createElement('div'); info.className = 'info';
-      info.innerHTML = `
-        <h3>${game.name}</h3>
-        <p>${(game.description || 'No description').slice(0, 90)}</p>
-        <div class="visits">👁️ ${game.placeVisits.toLocaleString()} visits</div>
-      `;
-      const link = document.createElement('a'); link.href = `https://www.roblox.com/games/${game.rootPlace.id}`; link.target = '_blank'; link.rel = 'noopener'; link.textContent = 'Play'; info.appendChild(link);
-      inner.append(img, info); card.appendChild(inner);
-      return card;
+      info.innerHTML = `<h3>${game.name}</h3><p>${(game.description||'No description').slice(0,90)}</p><div class="visits">👁️ ${game.placeVisits.toLocaleString()} visits</div>`;
+      const link = document.createElement('a'); link.href = `roblox://placeId=${game.rootPlace.id}`; link.target = '_blank'; link.rel='noopener'; link.textContent='Play'; info.appendChild(link);
+      inner.append(img,info); card.appendChild(inner); return card;
     }
 
     async function init() {
-      updateVersion();
-      const intro = document.getElementById('intro');
-      const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) intro.classList.add('visible'), io.disconnect(); });
-      io.observe(intro);
-      try {
-        const data = await fetchGames();
-        const games = Array.isArray(data.data) ? data.data.slice(0, RENDER_LIMIT) : [];
-        const grid = document.getElementById('grid');
-        for (const game of games) {
-          const card = grid.appendChild(createCard(game, 'https://via.placeholder.com/768x432?text=Loading...'));
-          const imgElem = card.querySelector('img');
-          const thumbUrl = await fetchThumbnail(game.rootPlace.id);
-          imgElem.src = thumbUrl;
-          await sleep(1000);
-        }
-      } catch (e) {
-        console.error(e);
-        document.body.insertAdjacentHTML('beforeend', `<div class="error">Failed: ${e.message}</div>`);
+      const grid = document.getElementById('grid');
+      const data = await fetchGames();
+      const games = Array.isArray(data.data)?data.data.slice(0,RENDER_LIMIT):[];
+      const obs = new IntersectionObserver(entries=>{entries.forEach(({target,isIntersecting})=>{if(isIntersecting){target.classList.add('visible');obs.unobserve(target);}});},{threshold:0.1});
+      for(const g of games){
+        const c=grid.appendChild(createCard(g,'https://via.placeholder.com/768x432?text=Loading...'));
+        obs.observe(c);
+        const img=c.querySelector('img'); img.src=await fetchThumbnail(g.rootPlace.id);
       }
+      document.getElementById('copyBtn').addEventListener('click',()=>navigator.clipboard.writeText('its_turdle'));
     }
-
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded',init);
   </script>
 </body>
 </html>
