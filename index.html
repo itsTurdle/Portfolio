@@ -88,6 +88,18 @@
   <script>
     const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
     const GAMES_API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
+    const VERSION_KEY = 'portfolioVersion';
+
+    // Semantic version bump: overhaul.minor.patch
+    function updateVersion() {
+      let version = localStorage.getItem(VERSION_KEY);
+      if (!version) version = '1.0.0';
+      const parts = version.split('.').map(n => parseInt(n, 10));
+      parts[2] = (parts[2] || 0) + 1; // bump patch
+      const newVer = parts.join('.');
+      localStorage.setItem(VERSION_KEY, newVer);
+      document.querySelector('.version').textContent = `v${newVer}`;
+    }
 
     async function fetchGames() {
       const res = await fetch(proxy(GAMES_API), { cache: 'no-store' });
@@ -104,9 +116,7 @@
           const res = await fetch(url, { cache: 'no-store' });
           if (res.ok) {
             const json = await res.json();
-            if (Array.isArray(json.data) && json.data[0]?.imageUrl) {
-              imgUrl = json.data[0].imageUrl;
-            }
+            if (Array.isArray(json.data) && json.data[0]?.imageUrl) imgUrl = json.data[0].imageUrl;
           }
         } catch {}
       }
@@ -146,20 +156,24 @@
     }
 
     async function init() {
+      updateVersion();
       try {
         const data = await fetchGames();
-        const games = Array.isArray(data.data) ? data.data : [];
+        const games = Array.isArray(data.data) ? data.data.slice(0, 4) : [];
         const grid = document.getElementById('grid');
+
+        // render placeholders
         const cards = games.map(game => {
           const card = createCard(game, 'https://via.placeholder.com/768x432?text=Loading...');
           grid.appendChild(card);
           return { card, game };
         });
+
+        // fetch and replace images
         for (const { card, game } of cards) {
           try {
             const thumbUrl = await fetchThumbnail(game.rootPlace.id);
-            const img = card.querySelector('img');
-            img.src = thumbUrl;
+            card.querySelector('img').src = thumbUrl;
           } catch {}
         }
       } catch (e) {
