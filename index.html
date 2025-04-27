@@ -19,6 +19,20 @@
       align-items: center;
       min-height: 100vh;
       padding: 2rem;
+      position: relative;
+    }
+    /* Version badge */
+    .version {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     h1 {
       margin-bottom: 1rem;
@@ -69,6 +83,7 @@
   </style>
 </head>
 <body>
+  <div class="version">v1.0.0</div>
   <h1>My Latest Roblox Games</h1>
   <div class="grid" id="grid"></div>
   <script>
