@@ -1,161 +1,176 @@
-// index.js
-const PROXY_BASE = 'https://api.allorigins.win/raw?url=';
-
-async function fetchThumbnail(id) {
-  const thumbUrl = `https://thumbnails.roblox.com/v1/assets?assetIds=${id}&size=768x432&format=Png&isCircular=false`;
-  try {
-    const res = await fetch(thumbUrl, { headers: { 'Roblox-Place-Id': id } });
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    return data.data?.[0]?.imageUrl || null;
-  } catch (e) {
-    const proxyUrl = PROXY_BASE + encodeURIComponent(thumbUrl);
-    try {
-      const res2 = await fetch(proxyUrl);
-      if (!res2.ok) throw new Error();
-      const data2 = await res2.json();
-      return data2.data?.[0]?.imageUrl || proxyUrl;
-    } catch {
-      return null;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- To pre-cache thumbnails on server, run `fetch-thumbnails.js` -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hey, I'm turdle👋">
+  <meta property="og:description" content="A 12,000 hour scripter.">
+  <meta property="og:url" content="https://itsTurdle.github.io/hire/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>t u r d l e</title>
+  <link rel="icon" href="favicon.ico">
+  <style>
+    :root { --accent: #b536ff; --glow-accent: rgba(181,54,255,0.6); --neon-glow: 0 0 8px var(--accent), 0 0 20px var(--accent); }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, Arial, sans-serif;
+      color: #e0e0e0;
+      background: #0f0f12;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+      cursor: url('custom-cursor.png'), auto;
+      position: relative;
+      overflow-x: hidden;
     }
-  }
-}
-
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
-function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-window.addEventListener('resize', resize);
-resize();
-
-const particles = [], COUNT = 135, TH = 120, RS = 0.002, MV = 1;
-let mouse = { x: null, y: null };
-document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-for (let i = 0; i < COUNT; i++) {
-  const p = {
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    x0: null,
-    y0: null,
-    vx: (Math.random() - 0.5) * 0.5,
-    vy: (Math.random() - 0.5) * 0.5,
-    size: Math.random() * 2 + 1
-  };
-  p.x0 = p.x;
-  p.y0 = p.y;
-  particles.push(p);
-}
-
-function animate() {
-  ctx.fillStyle = '#0f0f12';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  particles.forEach((a, i) => {
-    for (let j = i + 1; j < COUNT; j++) {
-      const b = particles[j];
-      const dx = a.x - b.x;
-      const dy = a.y - b.y;
-      const d = Math.hypot(dx, dy);
-      if (d < TH) {
-        const alpha = 1 - d / TH;
-        ctx.strokeStyle = `rgba(181,54,255,${alpha * 0.5})`;
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.stroke();
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+    header { text-align: center; margin-bottom: 2rem; }
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      color: var(--accent);
+      text-shadow: var(--neon-glow);
+      animation: float 3s ease-in-out infinite alternate;
+    }
+    @keyframes float { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+    .skills-list { list-style: disc; padding-left: 1.5rem; margin-top: 1rem; display: inline-block; text-align: left; }
+    .skills-list li { margin-bottom: .75rem; }
+    .skills-list li b { color: var(--accent); }
+    .section-title {
+      font-size: 2rem;
+      color: var(--accent);
+      text-shadow: var(--neon-glow);
+      margin: 2rem auto 1rem;
+      text-align: center;
+      width: 100%;
+      max-width: 300px;
+    }
+    .pricing-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; list-style: none; padding: 0; margin: 0 auto .5rem; max-width: 360px; width: 100%; }
+    .pricing-list li { font-size: 1.1rem; color: var(--accent); font-weight: bold; text-shadow: var(--neon-glow); transition: transform .2s ease; }
+    .pricing-list li:nth-child(1) { text-align: right; }
+    .pricing-list li:nth-child(2) { text-align: left; }
+    .pricing-list li.glow { text-shadow: 0 0 10px var(--accent), 0 0 25px var(--accent), 0 0 40px var(--accent); }
+    .pricing-list li:hover { transform: translateY(-4px); }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      padding: .5rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: var(--neon-glow);
+      text-shadow: var(--neon-glow);
+      transition: box-shadow .2s ease, transform .2s ease;
+    }
+    .btn:hover { box-shadow: 0 0 30px var(--accent); transform: translateY(-2px); }
+    .btn img { width: 18px; height: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(280px, 1fr)); gap: 1.5rem; width: 100%; max-width: 1200px; }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    .card { height: 360px; perspective: 1000px; opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+    .card.visible { opacity: 1; transform: translateY(0); }
+    .inner { position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; border-radius: 16px; background: rgba(20,20,30,0.7); box-shadow: 0 0 10px var(--glow-accent); transition: transform .2s ease, box-shadow .2s ease; }
+    .inner:hover { box-shadow: 0 0 20px var(--glow-accent); }
+    .inner img { width: 100%; height: 180px; object-fit: cover; flex-shrink: 0; opacity: 0; transition: opacity .3s ease; }
+    .info { flex: 1; display: flex; flex-direction: column; padding: 1rem; }
+    .info h3 { margin: 0 0 .5rem; font-size: 1.2rem; }
+    .info p { margin: 0 0 auto; font-size: .9rem; line-height: 1.3; }
+    .age { font-size: .85rem; margin-bottom: .75rem; }
+    .contact { display: flex; flex-direction: column; align-items: center; gap: 1rem; width: 100%; max-width: 300px; margin: .5rem auto 0; }
+    .contact .btn { width: 100%; }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <header>
+    <h1>I'm turdle, a Scripter</h1>
+    <ul class="skills-list">
+      <li>I have logged over <b>12,000 hours</b> crafting scripts for <b>diverse applications</b>.</li>
+      <li>I specialize in designing <b>intuitive user interfaces</b> and <b>robust backend systems</b>.</li>
+      <li>I excel at building <b>environments</b>, developing <b>UI layouts</b>, and managing <b>server infrastructure</b>.</li>
+      <li>I operate on a <b>flexible schedule</b>, working in <b>EST</b>.</li>
+      <li>I focus my work on <b>backend logic</b> and <b>user interface design</b>, rather than <b>combat mechanics</b>.</li>
+    </ul>
+  </header>
+  <div class="grid" id="grid"></div>
+  <h2 class="section-title">Pricing</h2>
+  <ul class="pricing-list">
+    <li class="glow">Per Task<br>$5 - $25</li>
+    <li>Percentage<br>Negotiable</li>
+  </ul>
+  <h2 class="section-title">Contact</h2>
+  <div class="contact">
+    <a href="discord://-/users/862057084103163924" class="btn" rel="noopener">
+      <img src="discord.png" alt="Discord">Discord
+    </a>
+    <button class="btn" id="copyBtn">
+      <img src="link.png" alt="Copy"><span id="copyLabel">its_turdle</span>
+    </button>
+  </div>
+  <script>
+    const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
+    async function fetchThumbnail(id) {
+      const thumbnailUrl = `https://thumbnails.roblox.com/v1/assets?assetIds=${id}&size=768x432&format=Png&isCircular=false`;
+      const metadataUrl = proxy(thumbnailUrl);
+      console.log(`Fetch metadata: ${metadataUrl}`);
+      try {
+        const res = await fetch(metadataUrl, { headers: { 'Roblox-Place-Id': id } });
+        const data = await res.json();
+        return data.data?.[0]?.imageUrl || null;
+      } catch (e) {
+        console.error(`Metadata error: ${e}`);
+        return null;
       }
     }
-  });
-  particles.forEach(p => {
-    if (mouse.x !== null) {
-      const dx = p.x - mouse.x;
-      const dy = p.y - mouse.y;
-      const d = Math.hypot(dx, dy);
-      if (d < 100) {
-        const f = (100 - d) / 100 * 0.5;
-        p.vx += (dx / d) * f;
-        p.vy += (dy / d) * f;
-      }
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d');
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    const particles = [], COUNT = 135, TH = 120, RS = 0.002, MV = 1; let mouse = { x: null, y: null };
+    document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    for (let i = 0; i < COUNT; i++) { const p = { x: Math.random() * canvas.width, y: Math.random() * canvas.height, x0: null, y0: null, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5, size: Math.random() * 2 + 1 }; p.x0 = p.x; p.y0 = p.y; particles.push(p); }
+    function animate() {
+      ctx.fillStyle = '#0f0f12'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((a, i) => { for (let j = i + 1; j < COUNT; j++) { const b = particles[j], dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy); if (d < TH) { const alpha = 1 - d / TH; ctx.strokeStyle = `rgba(181,54,255,${alpha * 0.5})`; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); } } });
+      particles.forEach(p => { if (mouse.x !== null) { const dx = p.x - mouse.x, dy = p.y - mouse.y, d = Math.hypot(dx, dy); if (d < 100) { const f = (100 - d) / 100 * 0.5; p.vx += (dx / d) * f; p.vy += (dy / d) * f; } } p.vx += (p.x0 - p.x) * RS; p.vy += (p.y0 - p.y) * RS; const sp = Math.hypot(p.vx, p.vy); if (sp > MV) { p.vx = p.vx / sp * MV; p.vy = p.vy / sp * MV; } p.vx *= 0.9; p.vy *= 0.9; p.x += p.vx; p.y += p.vy; if (p.x < 0) { p.x = 0; p.vx *= -1; } if (p.x > canvas.width) { p.x = canvas.width; p.vx *= -1; } if (p.y < 0) { p.y = 0; p.vy *= -1; } if (p.y > canvas.height) { p.y = canvas.height; p.vy *= -1; } ctx.fillStyle = 'rgba(181,54,255,0.7)'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); });
+      requestAnimationFrame(animate);
     }
-    p.vx += (p.x0 - p.x) * RS;
-    p.vy += (p.y0 - p.y) * RS;
-    const sp = Math.hypot(p.vx, p.vy);
-    if (sp > MV) {
-      p.vx = p.vx / sp * MV;
-      p.vy = p.vy / sp * MV;
+    animate();
+    const API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10', LIMIT = 4;
+    async function fetchGames() { const r = await fetch(proxy(API), { cache: 'no-store' }); if (!r.ok) throw `HTTP ${r.status}`; return (await r.json()).data; }
+    function createCard(game) { const id = game.rootPlace.id; const card = document.createElement('div'); card.className = 'card'; const inner = document.createElement('div'); inner.className = 'inner'; const img = document.createElement('img'); card.style.display = 'none'; let resolveLoad; card.loadPromise = new Promise(r => resolveLoad = r);
+      console.log(`Try local: thumbnails/${id}.png`); img.src = `thumbnails/${id}.png`;
+      img.onload = () => { img.style.opacity = '1'; card.style.display = ''; resolveLoad(); };
+      img.onerror = async () => { console.warn(`Local fail ${id}`); await sleep(1000); const remote = await fetchThumbnail(id);
+        if (remote) { const proxied = proxy(remote); console.log(`Load remote (proxied): ${proxied}`); img.src = proxied; img.onload = () => { img.style.opacity = '1'; card.style.display = ''; resolveLoad(); }; img.onerror = () => { console.error(`Remote fail ${id}`); const ph = 'https://via.placeholder.com/768x432?text=No+Image'; img.src = ph; img.onload = () => { card.style.display = ''; resolveLoad(); }; }; } else { const ph = 'https://via.placeholder.com/768x432?text=No+Image'; img.src = ph; img.onload = () => { card.style.display = ''; resolveLoad(); }; } };
+      inner.append(img);
+      const info = document.createElement('div'); info.className = 'info'; const weeks = Math.floor((Date.now() - new Date(game.created).getTime()) / (1000 * 60 * 60 * 24 * 7)); const age = weeks > 0 ? `${weeks}w ago` : `${Math.floor((Date.now() - new Date(game.created)) / 86400000)}d ago`;
+      info.innerHTML = `<h3><a href="https://www.roblox.com/games/${id}" target="_blank">${game.name}</a></h3><p>${(game.description || 'No description').slice(0,90)}</p><div class="age">🕒 ${age}</div>`;
+      const btn = document.createElement('a'); btn.href = `roblox://placeId=${id}`; btn.className = 'btn'; btn.textContent = 'Play'; info.append(btn);
+      inner.append(info); card.append(inner); return card; }
+    async function init() { const grid = document.getElementById('grid'); const games = (await fetchGames()).slice(0, LIMIT); const obs = new IntersectionObserver(entries => entries.forEach(({target,isIntersecting}) => isIntersecting && target.classList.add('visible')), { threshold: 0.1 });
+      for (const g of games) { const c = createCard(g); grid.append(c); obs.observe(c); await c.loadPromise; }
+      const copyBtn = document.getElementById('copyBtn'); const copyLabel = document.getElementById('copyLabel');
+      copyBtn.addEventListener('click', async () => { const t = copyLabel.textContent; if (navigator.clipboard) await navigator.clipboard.writeText(t); else { const i = document.createElement('input'); i.value = t; document.body.append(i); i.select(); document.execCommand('copy'); i.remove(); } copyLabel.textContent = 'Copied!'; setTimeout(() => copyLabel.textContent = 'its_turdle', 1500); });
     }
-    p.vx *= 0.9;
-    p.vy *= 0.9;
-    p.x += p.vx;
-    p.y += p.vy;
-    if (p.x < 0) { p.x = 0; p.vx *= -1; }
-    if (p.x > canvas.width) { p.x = canvas.width; p.vx *= -1; }
-    if (p.y < 0) { p.y = 0; p.vy *= -1; }
-    if (p.y > canvas.height) { p.y = canvas.height; p.vy *= -1; }
-    ctx.fillStyle = 'rgba(181,54,255,0.7)';
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  requestAnimationFrame(animate);
-}
-animate();
-
-const API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
-const LIMIT = 4;
-async function fetchGames() {
-  const res = await fetch(API, { cache: 'no-store' });
-  if (!res.ok) throw `HTTP ${res.status}`;
-  return (await res.json()).data;
-}
-function createCard(game) {
-  const id = game.rootPlace.id;
-  const card = document.createElement('div');
-  card.className = 'card';
-  const inner = document.createElement('div');
-  inner.className = 'inner';
-  const img = document.createElement('img');
-  card.style.display = 'none';
-  let resolveLoad;
-  card.loadPromise = new Promise(r => resolveLoad = r);
-  fetchThumbnail(id).then(remote => {
-    const src = remote || 'https://via.placeholder.com/768x432?text=No+Image';
-    img.src = src;
-    img.onload = () => { img.style.opacity = '1'; card.style.display = ''; resolveLoad(); };
-    img.onerror = () => { const ph = 'https://via.placeholder.com/768x432?text=No+Image'; img.src = ph; img.onload = () => { card.style.display = ''; resolveLoad(); }; };
-  });
-  inner.append(img);
-  const info = document.createElement('div');
-  info.className = 'info';
-  const weeks = Math.floor((Date.now() - new Date(game.created).getTime()) / (1000 * 60 * 60 * 24 * 7));
-  const age = weeks > 0 ? `${weeks}w ago` : `${Math.floor((Date.now() - new Date(game.created)) / 86400000)}d ago`;
-  info.innerHTML = `<h3><a href=\"https://www.roblox.com/games/${id}\" target=\"_blank\">${game.name}</a></h3><p>${(game.description||'No description').slice(0,90)}</p><div class=\"age\">🕒 ${age}</div>`;
-  const btn = document.createElement('a');
-  btn.href = `roblox://placeId=${id}`;
-  btn.className = 'btn';
-  btn.textContent = 'Play';
-  info.append(btn);
-  inner.append(info);
-  card.append(inner);
-  return card;
-}
-async function init() {
-  const grid = document.getElementById('grid');
-  const games = (await fetchGames()).slice(0, LIMIT);
-  const obs = new IntersectionObserver(entries => entries.forEach(({target,isIntersecting}) => isIntersecting && target.classList.add('visible')), { threshold: 0.1 });
-  for (const g of games) {
-    const c = createCard(g);
-    grid.append(c);
-    obs.observe(c);
-    await c.loadPromise;
-  }
-  const copyBtn = document.getElementById('copyBtn');
-  const copyLabel = document.getElementById('copyLabel');
-  copyBtn.addEventListener('click', async () => {
-    const t = copyLabel.textContent;
-    if (navigator.clipboard) await navigator.clipboard.writeText(t);
-    else { const i = document.createElement('input'); i.value = t; document.body.append(i); i.select(); document.execCommand('copy'); i.remove(); }
-    copyLabel.textContent = 'Copied!';
-    setTimeout(() => copyLabel.textContent = 'its_turdle', 1500);
-  });
-}
-document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
