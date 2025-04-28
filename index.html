@@ -208,21 +208,54 @@
 
     async function init() {
       const grid = document.getElementById('grid');
-      try {
-        const data = await fetchGames();
-        const games = Array.isArray(data.data) ? data.data.slice(0, RENDER_LIMIT) : [];
-        const obs = new IntersectionObserver(entries => {
-          entries.forEach(({ target, isIntersecting }) => {
-            if (isIntersecting) { target.classList.add('visible'); obs.unobserve(target); }
-          });
-        }, { threshold: 0.1 });
+      let data;
 
-        for (const g of games) {
-          const card = createCard(g, 'https://via.placeholder.com/768x432?text=Loading...');
-          grid.appendChild(card); obs.observe(card);
-          card.querySelector('img').src = await fetchThumbnail(g.rootPlace.id);
+      while (true) {
+        try {
+          data = await fetchGames();
+          break;
+        } catch (e) {
+          await sleep(800);
         }
-      } catch (e) { console.error(e); }
+      }
+
+      const games = Array.isArray(data.data) ? data.data.slice(0, RENDER_LIMIT) : [];
+      const obs = new IntersectionObserver(entries => {
+      entries.forEach(({ target, isIntersecting }) => {
+        if (isIntersecting) { target.classList.add('visible'); obs.unobserve(target); }
+      });
+      }, { threshold: 0.1 });
+
+      for (const g of games) {
+        const card = createCard(g, 'https://via.placeholder.com/768x432?text=Loading...');
+        grid.appendChild(card);
+        obs.observe(card);
+        card.querySelector('img').src = await fetchThumbnail(g.rootPlace.id);
+      }
+
+      // copy button logic…
+      const copyBtn   = document.getElementById('copyBtn');
+      const copyLabel = document.getElementById('copyLabel');
+    
+      copyBtn.addEventListener('click', async () => {
+        const text = copyLabel.textContent;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const inp = document.createElement('input');
+          inp.value = text;
+          document.body.appendChild(inp);
+          inp.select();
+          document.execCommand('copy');
+          document.body.removeChild(inp);
+        }
+        copyLabel.textContent = 'Copied!';
+        setTimeout(() => copyLabel.textContent = 'its_turdle', 1500);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+
 
     const copyBtn   = document.getElementById('copyBtn');
     const copyLabel = document.getElementById('copyLabel');
