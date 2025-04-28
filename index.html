@@ -85,7 +85,28 @@
     .info .btn { padding: .4rem .8rem; align-self: flex-start; }
 
     /* Contact */
-    .contact { width: 100%; max-width: 1200px; display: grid; grid-template-columns: repeat(2, minmax(280px, 1fr)); gap: 1.5rem; margin: 0.5rem auto 0; }
+    /* Contact */
+    .contact {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      margin: 0.5rem auto 0;
+    }
+
+    .contact .btn {
+      flex: 1 1 45%;      /* allow each button to grow/shrink, target ~45% width */
+      max-width: 240px;   /* cap their maximum size */
+    }
+
+    /* on very small screens, stack them full-width */
+    @media (max-width: 400px) {
+      .contact .btn {
+        flex: 1 1 100%;
+        max-width: none;
+      }
+    }
+
   </style>
 </head>
 <body>
