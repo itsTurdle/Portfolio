@@ -197,16 +197,32 @@
         }
       } catch (e) { console.error(e); }
 
-      const copyBtn = document.getElementById('copyBtn');
-      const copyLabel = document.getElementById('copyLabel');
-      copyBtn.addEventListener('click', async () => {
+    const copyBtn   = document.getElementById('copyBtn');
+    const copyLabel = document.getElementById('copyLabel');
+
+    copyBtn.addEventListener('click', async () => {
+        // Get the text to copy
         const text = copyLabel.textContent;
-        if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(text);
-        else {
-          const inp = document.createElement('input'); inp.value = text; document.body.appendChild(inp); inp.select(); document.execCommand('copy'); document.body.removeChild(inp);
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+        } else {
+            const inp = document.createElement('input');
+            inp.value = text;
+            document.body.appendChild(inp);
+            inp.select();
+            document.execCommand('copy');
+            document.body.removeChild(inp);
         }
-        copyLabel.textContent = 'Copied!'; setTimeout(() => copyLabel.textContent = 'its_turdle', 1500);
-      });
+
+        // Feedback
+        copyLabel.textContent = 'Copied!';
+        setTimeout(() => {
+            copyLabel.textContent = 'its_turdle';
+        }, 1500);
+    });
+
+
     }
     document.addEventListener('DOMContentLoaded', init);
   </script>
