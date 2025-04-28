@@ -29,6 +29,7 @@
       padding: 2rem;
       cursor: url('custom-cursor.png'), auto;
     }
+    .highlight { background: rgba(181,54,255,0.3); padding: 0 0.2em; border-radius: 4px; }
     header { text-align: center; margin-bottom: 2rem; }
     header h1 { margin: 0; font-size: 2.5rem; color: var(--accent); text-shadow: var(--neon-glow); }
     .skills-list { list-style: disc; padding-left: 1.5rem; margin-top: 1rem; display: inline-block; text-align: left; }
@@ -74,11 +75,11 @@
   <header>
     <h1>I'm turdle, a Scripter</h1>
     <ul class="skills-list">
-      <li>I have logged over 12,000 hours crafting scripts for diverse applications.</li>
-      <li>I specialize in designing intuitive user interfaces and robust backend systems.</li>
-      <li>I excel at building environments, developing UI layouts, and managing server infrastructure.</li>
-      <li>I operate on a flexible schedule, working primarily in the Eastern Time Zone.</li>
-      <li>I focus my work on backend logic and user interface design, rather than combat mechanics.</li>
+      <li>I have logged over <span class="highlight">12,000 hours</span> crafting scripts for <span class="highlight">diverse applications</span>.</li>
+      <li>I specialize in designing <span class="highlight">intuitive user interfaces</span> and <span class="highlight">robust backend systems</span>.</li>
+      <li>I excel at building <span class="highlight">environments</span>, developing <span class="highlight">UI layouts</span>, and managing <span class="highlight">server infrastructure</span>.</li>
+      <li>I operate on a <span class="highlight">flexible schedule</span>, working primarily in the Eastern Time Zone.</li>
+      <li>I focus my work on <span class="highlight">backend logic</span> and <span class="highlight">user interface design</span>, rather than combat mechanics.</li>
     </ul>
   </header>
 
@@ -121,6 +122,11 @@
     }
 
     async function fetchThumbnail(pid) {
+      // Try local static file first (pre-fetched and saved to /thumbnails/<pid>.png)
+      try {
+        const head = await fetch(`/thumbnails/${pid}.png`, { method: 'HEAD' });
+        if (head.ok) return `/thumbnails/${pid}.png`;
+      } catch {}
       const cache = JSON.parse(localStorage.getItem(THUMB_CACHE_KEY) || '{}');
       if (cache[pid]) return cache[pid];
       const url = `https://thumbnails.roblox.com/v1/assets?assetIds=${pid}&size=768x432&format=Png&isCircular=false`;
@@ -130,7 +136,7 @@
           const r = await fetch(proxy(url), { cache: 'no-store' });
           const data = await r.json();
           imgUrl = data.data?.[0]?.imageUrl || '';
-        } catch {}
+        } catch{}
         if (!imgUrl) await sleep(800);
       }
       const updated = { ...JSON.parse(localStorage.getItem(THUMB_CACHE_KEY) || '{}'), [pid]: imgUrl };
@@ -153,11 +159,11 @@
       img.onerror = () => img.src = 'https://cdn.jsdelivr.net/gh/yourusername/yourrepo/placeholder.png';
 
       const info = document.createElement('div'); info.className = 'info';
-      const visits = (typeof game.playCount === 'number') ? game.playCount.toLocaleString() : 'N/A';
+      const visites = (typeof game.playCount === 'number') ? game.playCount.toLocaleString() : 'N/A';
       info.innerHTML = `
         <h3><a href="https://www.roblox.com/games/${game.rootPlace.id}" target="_blank" rel="noopener">${game.name}</a></h3>
         <p>${(game.description || 'No description').slice(0, 90)}</p>
-        <div class="visits">👁️ ${visits} visits</div>
+        <div class="visits">👁️ ${visites} visits</div>
       `;
       const playBtn = document.createElement('a'); playBtn.href = `roblox://placeId=${game.rootPlace.id}`; playBtn.className = 'btn'; playBtn.textContent = 'Play';
       info.appendChild(playBtn); inner.append(img, info); card.appendChild(inner);
