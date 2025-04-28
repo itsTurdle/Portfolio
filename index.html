@@ -5,7 +5,7 @@
   <meta property="og:title" content="Hey, I'm turdle👋">
   <meta property="og:description" content="A 12,000 hour scripter.">
   <meta property="og:url" content="https://itsTurdle.github.io/hire/">
-  
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>t u r d l e</title>
@@ -36,7 +36,15 @@
     header h1 { margin: 0; font-size: 2.5rem; color: var(--accent); text-shadow: var(--neon-glow); }
     .skills-list { list-style: disc; padding-left: 1.5rem; margin-top: 1rem; display: inline-block; text-align: left; }
     .skills-list li { margin-bottom: 0.75rem; }
-    .section-title { font-size: 2rem; color: var(--accent); text-shadow: var(--neon-glow); margin: 2rem 0 1rem; text-align: center; }
+    .section-title {
+      font-size: 2rem;
+      color: var(--accent);
+      text-shadow: var(--neon-glow);
+      margin: 2rem auto 1rem;
+      text-align: center;
+      width: 100%;
+      max-width: 300px;
+    }
 
     /* Pricing */
     .pricing-list {
@@ -68,7 +76,7 @@
 
     /* Grid */
     .grid { display: grid; grid-template-columns: repeat(2, minmax(280px, 1fr)); gap: 1.5rem; width: 100%; max-width: 1200px; }
-    @media (max-width: 600px) { .grid, .contact { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
 
     /* Cards */
     .card { height: 360px; perspective: 1000px; opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
@@ -81,32 +89,11 @@
     .info h3 a { color: var(--accent); text-shadow: var(--neon-glow); text-decoration: none; }
     .info h3 a:hover { text-decoration: underline; }
     .info p { margin: 0 0 .5rem; font-size: .9rem; line-height: 1.3; }
-    .visits { font-size: .85rem; margin-bottom: .75rem; }
-    .info .btn { padding: .4rem .8rem; align-self: flex-start; }
+    .age { font-size: .85rem; margin-bottom: .75rem; }
 
-    /* Contact */
-    /* Contact */
-    .contact {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1.5rem;
-      margin: 0.5rem auto 0;
-    }
-
-    .contact .btn {
-      flex: 1 1 45%;      /* allow each button to grow/shrink, target ~45% width */
-      max-width: 240px;   /* cap their maximum size */
-    }
-
-    /* on very small screens, stack them full-width */
-    @media (max-width: 400px) {
-      .contact .btn {
-        flex: 1 1 100%;
-        max-width: none;
-      }
-    }
-
+    /* Contact: always stacked */
+    .contact { display: flex; flex-direction: column; align-items: center; gap: 1rem; width: 100%; max-width: 300px; margin: 0.5rem auto 0; }
+    .contact .btn { width: 100%; }
   </style>
 </head>
 <body>
@@ -131,26 +118,21 @@
 
   <h2 class="section-title">Contact</h2>
   <div class="contact">
-    <a href="discord://-/users/862057084103163924" class="btn" target="_blank" rel="noopener">
-      <img src="https://cdn.discordapp.com/attachments/1073591315419373598/1366203987585404978/discord-white-icon.png?ex=6810181d&is=680ec69d&hm=15bcab0293a7739c549409f63034019e2ef817f773a37e8a39072a59092e1456&" alt="Discord">
-      Discord
+    <a href="discord://-/users/862057084103163924" class="btn" rel="noopener">
+      <img src="https://cdn.discordapp.com/attachments/1073591315419373598/1366203987585404978/discord-white-icon.png?ex=6810181d&is=680ec69d&hm=15bcab0293a7739c549409f63034019e2ef817f773a37e8a39072a59092e1456&" alt="Discord">Discord
     </a>
     <button class="btn" id="copyBtn">
-      <img src="https://cdn.discordapp.com/attachments/1073591315419373598/1366204318218457129/link-xxl.png?ex=6810186c&is=680ec6ec&hm=4b81c1282873a493746b1bb4688a19db33116243ee5589b0252052386d35871c&" alt="Copy">
-      <span id="copyLabel">its_turdle</span>
+      <img src="https://cdn.discordapp.com/attachments/1073591315419373598/1366204318218457129/link-xxl.png?ex=6810186c&is=680ec6ec&hm=4b81c1282873a493746b1bb4688a19db33116243ee5589b0252052386d35871c&" alt="Copy">its_turdle
     </button>
   </div>
 
   <script>
-    /* Theme */
     const COLOR_THEME = '#b536ff';
     document.documentElement.style.setProperty('--accent', COLOR_THEME);
 
-    /* Helpers */
     const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
     const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-    /* API */
     const GAMES_API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
     const RENDER_LIMIT = 4;
     const THUMB_CACHE_KEY = 'thumbCache';
@@ -174,12 +156,11 @@
         } catch {}
         if (!imgUrl) await sleep(800);
       }
-      const updated = { ...JSON.parse(localStorage.getItem(THUMB_CACHE_KEY) || '{}'), [pid]: imgUrl };
-      localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(updated));
+      cache[pid] = imgUrl;
+      localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(cache));
       return imgUrl;
     }
 
-    /* UI */
     function createCard(game, imgUrl) {
       const card = document.createElement('div'); card.className = 'card';
       const inner = document.createElement('div'); inner.className = 'inner';
@@ -194,93 +175,54 @@
       const img = document.createElement('img'); img.src = imgUrl; img.onerror = () => img.src = 'https://via.placeholder.com/768x432?text=No+Image';
 
       const info = document.createElement('div'); info.className = 'info';
-      const visits = game.playCount ? game.playCount.toISOString ? game.playCount.toLocaleString() : game.playCount : 'N/A';
+      const createdDate = new Date(game.created);
+      const diffMs = Date.now() - createdDate.getTime();
+      const weeks = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 7));
+      let ageText;
+      if (weeks > 0) ageText = `${weeks} weeks ago`;
+      else {
+        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        ageText = days > 0 ? `${days} days ago` : 'now';
+      }
       info.innerHTML = `
         <h3><a href="https://www.roblox.com/games/${game.rootPlace.id}" target="_blank" rel="noopener">${game.name}</a></h3>
         <p>${(game.description || 'No description').slice(0, 90)}</p>
-        <div class="visits">👁️ ${visits} visits</div>
+        <div class="age">🕒 ${ageText}</div>
       `;
       const playBtn = document.createElement('a'); playBtn.href = `roblox://placeId=${game.rootPlace.id}`; playBtn.className = 'btn'; playBtn.textContent = 'Play';
       info.appendChild(playBtn);
-      inner.append(img, info); card.appendChild(inner);
+      inner.append(img, info);
+      card.appendChild(inner);
       return card;
     }
 
     async function init() {
       const grid = document.getElementById('grid');
       let data;
-
       while (true) {
-        try {
-          data = await fetchGames();
-          break;
-        } catch (e) {
-          await sleep(20);
-        }
+        try { data = await fetchGames(); break; } catch (e) { await sleep(800); }
       }
-
       const games = Array.isArray(data.data) ? data.data.slice(0, RENDER_LIMIT) : [];
       const obs = new IntersectionObserver(entries => {
-      entries.forEach(({ target, isIntersecting }) => {
-        if (isIntersecting) { target.classList.add('visible'); obs.unobserve(target); }
-      });
+        entries.forEach(({ target, isIntersecting }) => {
+          if (isIntersecting) { target.classList.add('visible'); obs.unobserve(target); }
+        });
       }, { threshold: 0.1 });
 
       for (const g of games) {
         const card = createCard(g, 'https://via.placeholder.com/768x432?text=Loading...');
-        grid.appendChild(card);
-        obs.observe(card);
-        card.querySelector('img').src = await fetchThumbnail(g.rootPlace.id);
+        grid.appendChild(card); obs.observe(card);
+        try { card.querySelector('img').src = await fetchThumbnail(g.rootPlace.id); } catch {}
       }
 
-      // copy button logic…
       const copyBtn   = document.getElementById('copyBtn');
       const copyLabel = document.getElementById('copyLabel');
-    
       copyBtn.addEventListener('click', async () => {
         const text = copyLabel.textContent;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(text);
-        } else {
-          const inp = document.createElement('input');
-          inp.value = text;
-          document.body.appendChild(inp);
-          inp.select();
-          document.execCommand('copy');
-          document.body.removeChild(inp);
-        }
-        copyLabel.textContent = 'Copied!';
-        setTimeout(() => copyLabel.textContent = 'its_turdle', 1500);
+        if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(text);
+        else { const inp = document.createElement('input'); inp.value = text; document.body.appendChild(inp); inp.select(); document.execCommand('copy'); document.body.removeChild(inp); }
+        copyLabel.textContent = 'Copied!'; setTimeout(() => copyLabel.textContent = 'its_turdle', 1500);
       });
-    }
-
-    document.addEventListener('DOMContentLoaded', init);
-
-
-    const copyBtn   = document.getElementById('copyBtn');
-    const copyLabel = document.getElementById('copyLabel');
-
-    copyBtn.addEventListener('click', async () => {
-        // Get the text to copy
-        const text = copyLabel.textContent;
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(text);
-        } else {
-            const inp = document.createElement('input');
-            inp.value = text;
-            document.body.appendChild(inp);
-            inp.select();
-            document.execCommand('copy');
-            document.body.removeChild(inp);
-        }
-
-        // Feedback
-        copyLabel.textContent = 'Copied!';
-        setTimeout(() => {
-            copyLabel.textContent = 'its_turdle';
-        }, 1500);
-    });
     }
     document.addEventListener('DOMContentLoaded', init);
   </script>
