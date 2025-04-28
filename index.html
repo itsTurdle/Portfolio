@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- To pre-cache thumbnails on server, run `fetch-thumbnails.js` -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Hey, I'm turdle👋">
   <meta property="og:description" content="A 12,000 hour scripter.">
@@ -11,98 +12,47 @@
   <title>t u r d l e</title>
   <link rel="icon" href="https://raw.githubusercontent.com/itsTurdle/Portfolio/refs/heads/main/favicon.ico">
   <style>
-    :root {
-      --bg-dark: #0f0f12;
-      --card-bg: rgba(20,20,30,0.7);
-      --text-light: #e0e0e0;
-      --accent: #b536ff;
-      --glow-accent: rgba(181,54,255,0.6);
-      --neon-glow: 0 0 8px var(--accent), 0 0 20px var(--accent);
-    }
+    :root { --accent: #b536ff; --glow-accent: rgba(181,54,255,0.6); --neon-glow: 0 0 8px var(--accent), 0 0 20px var(--accent); }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, Arial, sans-serif;
-      background: var(--bg-dark);
-      color: var(--text-light);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 2rem;
-      cursor: url('custom-cursor.png'), auto;
-    }
-    header { text-align: center; margin-bottom: 2rem; }
-    header h1 { margin: 0; font-size: 2.5rem; color: var(--accent); text-shadow: var(--neon-glow); }
-    .skills-list { list-style: disc; padding-left: 1.5rem; margin-top: 1rem; display: inline-block; text-align: left; }
-    .skills-list li { margin-bottom: 0.75rem; }
-    .section-title {
-      font-size: 2rem;
-      color: var(--accent);
-      text-shadow: var(--neon-glow);
-      margin: 2rem auto 1rem;
-      text-align: center;
-      width: 100%;
-      max-width: 300px;
-    }
-
-    /* Pricing */
-    .pricing-list {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      column-gap: 1.5rem;
-      list-style: none;
-      padding: 0;
-      margin: 0 auto 0.5rem;
-      max-width: 360px;
-      width: 100%;
-    }
-    .pricing-list li {
-      font-size: 1.1rem;
-      color: var(--accent);
-      font-weight: bold;
-      text-shadow: var(--neon-glow);
-      transition: transform .2s ease;
-    }
-    .pricing-list li:nth-child(1) { text-align: right; }
-    .pricing-list li:nth-child(2) { text-align: left; }
-    .pricing-list li.glow { text-shadow: 0 0 10px var(--accent), 0 0 25px var(--accent), 0 0 40px var(--accent); }
-    .pricing-list li:hover { transform: translateY(-4px); }
-
-    /* Buttons */
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .5rem 1rem; background: var(--accent); color: #fff; border: none; border-radius: 999px; font-size: 1rem; cursor: pointer; text-decoration: none; box-shadow: var(--neon-glow); transition: box-shadow .2s ease, transform .2s ease; }
-    .btn:hover { box-shadow: 0 0 30px var(--accent); transform: translateY(-2px); }
-    .btn img { width: 18px; height: 18px; filter: none; pointer-events: none; }
-
-    /* Grid */
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(280px, 1fr)); gap: 1.5rem; width: 100%; max-width: 1200px; }
-    @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
-
-    /* Cards */
-    .card { height: 360px; perspective: 1000px; opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
-    .card.visible { opacity: 1; transform: translateY(0); }
-    .inner { position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; border-radius: 16px; background: var(--card-bg); box-shadow: 0 0 10px var(--glow-accent); transition: transform .2s ease, box-shadow .2s ease; }
-    .inner:hover { box-shadow: 0 0 20px var(--glow-accent); }
-    .inner img { width: 100%; height: 180px; object-fit: cover; flex-shrink: 0; transform: translateZ(12px); }
-    .info { flex: 1; display: flex; flex-direction: column; padding: 1rem; }
-    .info h3 { margin: 0 0 .5rem; font-size: 1.2rem; }
-    .info h3 a { color: var(--accent); text-shadow: var(--neon-glow); text-decoration: none; }
-    .info h3 a:hover { text-decoration: underline; }
-    .info p { margin: 0 0 .5rem; font-size: .9rem; line-height: 1.3; }
-    .age { font-size: .85rem; margin-bottom: .75rem; }
-
-    /* Contact: always stacked */
-    .contact { display: flex; flex-direction: column; align-items: center; gap: 1rem; width: 100%; max-width: 400px; margin: 0.5rem auto 0; }
-    .contact .btn { width: 100%; }
+    body { margin:0; font-family:system-ui,Arial,sans-serif; color:#e0e0e0; background:#0f0f12;
+      display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:2rem;
+      cursor:url('custom-cursor.png'),auto; position:relative; overflow-x:hidden; }
+    #bg-canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; pointer-events:none; }
+    header { text-align:center; margin-bottom:2rem; }
+    header h1 { margin:0; font-size:2.5rem; color:var(--accent); text-shadow:var(--neon-glow); }
+    .cursor { display:inline-block; width:2px; background:var(--accent); animation:blink 0.7s step-end infinite; vertical-align:text-bottom; margin-left:2px; }
+    @keyframes blink { 0%,100% { opacity:0; } 50% { opacity:1; } }
+    .skills-list { list-style:disc; padding-left:1.5rem; margin-top:1rem; display:inline-block; text-align:left; }
+    .skills-list li { margin-bottom:.75rem; }
+    .section-title { font-size:2rem; color:var(--accent); text-shadow:var(--neon-glow);
+      margin:2rem auto 1rem; text-align:center; width:100%; max-width:300px; }
+    .pricing-list { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; list-style:none; padding:0; margin:0 auto .5rem; max-width:360px; width:100%; }
+    .pricing-list li { font-size:1.1rem; color:var(--accent); font-weight:bold; text-shadow:var(--neon-glow); transition:transform .2s ease; }
+    .pricing-list li:nth-child(1){text-align:right;} .pricing-list li:nth-child(2){text-align:left;}
+    .pricing-list li.glow{ text-shadow:0 0 10px var(--accent),0 0 25px var(--accent),0 0 40px var(--accent);} .pricing-list li:hover{transform:translateY(-4px);}
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:.5rem 1rem; background:var(--accent);
+      color:#fff; border:none; border-radius:999px; font-size:1rem; cursor:pointer; text-decoration:none;
+      box-shadow:var(--neon-glow); text-shadow:var(--neon-glow); transition:box-shadow .2s ease, transform .2s ease; }
+    .btn:hover { box-shadow:0 0 30px var(--accent); transform:translateY(-2px);} .btn img{width:18px;height:18px;pointer-events:none;}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(280px,1fr));gap:1.5rem;width:100%;max-width:1200px;} @media(max-width:600px){.grid{grid-template-columns:1fr;}}
+    .card{height:360px;perspective:1000px;opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease;}
+    .card.visible{opacity:1;transform:translateY(0);}
+    .inner{position:relative;display:flex;flex-direction:column;height:100%;overflow:hidden;border-radius:16px;background:rgba(20,20,30,0.7);
+      box-shadow:0 0 10px var(--glow-accent);transition:transform .2s ease,box-shadow .2s ease;}
+    .inner:hover{box-shadow:0 0 20px var(--glow-accent);} .inner img{width:100%;height:180px;object-fit:cover;flex-shrink:0;}
+    .info{flex:1;display:flex;flex-direction:column;padding:1rem;} .info h3{margin:0 0 .5rem;font-size:1.2rem;} .info h3 a{color:var(--accent);text-shadow:var(--neon-glow);text-decoration:none;} .info h3 a:hover{text-decoration:underline;}
+    .info p{margin:0 0 auto;font-size:.9rem;line-height:1.3;} .age{font-size:.85rem;margin-bottom:.75rem;} .info .btn{margin-top:auto;}
+    .contact{display:flex;flex-direction:column;align-items:center;gap:1rem;width:100%;max-width:300px;margin:.5rem auto 0;} .contact .btn{width:100%;}
   </style>
 </head>
 <body>
+  <canvas id="bg-canvas"></canvas>
   <header>
-    <h1>I'm turdle, a Scripter</h1>
+    <h1 id="typewriter"></h1>
     <ul class="skills-list">
       <li>I have logged over 12,000 hours crafting scripts for diverse applications.</li>
       <li>I specialize in designing intuitive user interfaces and robust backend systems.</li>
-      <li>I can work in building environments, developing UI layouts, and managing server infrastructure.</li>
+      <li>I excel at building environments, developing UI layouts, and managing server infrastructure.</li>
       <li>I operate on a flexible schedule, working primarily in the Eastern Time Zone.</li>
       <li>I focus my work on backend logic and user interface design, rather than combat mechanics.</li>
     </ul>
@@ -119,111 +69,118 @@
   <h2 class="section-title">Contact</h2>
   <div class="contact">
     <a href="discord://-/users/862057084103163924" class="btn" rel="noopener">
-      <img src="https://cdn.discordapp.com/attachments/1073591315419373598/1366203987585404978/discord-white-icon.png?ex=6810181d&is=680ec69d&hm=15bcab0293a7739c549409f63034019e2ef817f773a37e8a39072a59092e1456&" alt="Discord">Discord
+      <img src="https://cdn.discordapp.com/attachments/1073591315419373598/1366203987585404978/discord-white-icon.png" alt="Discord">Discord
     </a>
     <button class="btn" id="copyBtn">
-      <img src="https://cdn.discordapp.com/attachments/1073591315419373598/1366204318218457129/link-xxl.png?ex=6810186c&is=680ec6ec&hm=4b81c1282873a493746b1bb4688a19db33116243ee5589b0252052386d35871c&" alt="Copy">its_turdle
+      <img src="https://cdn.discordapp.com/attachments/1073591315419373598/1366204318218457129/link-xxl.png" alt="Copy"><span id="copyLabel">its_turdle</span>
     </button>
   </div>
 
   <script>
-    const COLOR_THEME = '#b536ff';
-    document.documentElement.style.setProperty('--accent', COLOR_THEME);
+    // Typewriter with cursor
+    const text = "I'm turdle, a Scripter";
+    const el = document.getElementById('typewriter');
+    let idx = 0;
+    function type() {
+      if (idx <= text.length) {
+        el.innerHTML = text.slice(0, idx) + '<span class="cursor"></span>';
+        idx++;
+        setTimeout(type, 100);
+      } else {
+        setTimeout(() => { el.innerHTML = text; }, 500);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', type);
 
+    // Canvas particle background with click ripple
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const particles = [];
+    const count = 135;
+    const lineThreshold = 120;
+    const restoreStrength = 0.002;
+    const maxVelocity = 1;
+
+    for (let i = 0; i < count; i++) {
+      const p = {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        x0: null,
+        y0: null,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        size: Math.random() * 2 + 1
+      };
+      p.x0 = p.x; p.y0 = p.y;
+      particles.push(p);
+    }
+
+    // ripple parameters
+    let ripple = null;
+    canvas.addEventListener('click', e => {
+      ripple = { x: e.clientX, y: e.clientY, strength: 3 };
+    });
+
+    function animate() {
+      ctx.fillStyle = '#0f0f12'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // draw connections
+      for (let i = 0; i < count; i++) {
+        for (let j = i + 1; j < count; j++) {
+          const a = particles[i], b = particles[j];
+          const dx = a.x - b.x, dy = a.y - b.y, dist = Math.hypot(dx, dy);
+          if (dist < lineThreshold) {
+            const alpha = 1 - dist / lineThreshold;
+            ctx.strokeStyle = `rgba(181,54,255,${alpha * 0.5})`;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+      }
+      // update & draw
+      particles.forEach(p => {
+        // click ripple repulse once
+        if (ripple) {
+          const dx = p.x - ripple.x;
+          const dy = p.y - ripple.y;
+          const dist = Math.hypot(dx, dy);
+          const f = ripple.strength / (dist / 50 + 1);
+          p.vx += (dx / dist) * f;
+          p.vy += (dy / dist) * f;
+        }
+        // restore
+        p.vx += (p.x0 - p.x) * restoreStrength;
+        p.vy += (p.y0 - p.y) * restoreStrength;
+        // clamp
+        let sp = Math.hypot(p.vx, p.vy);
+        if (sp > maxVelocity) { p.vx = p.vx / sp * maxVelocity; p.vy = p.vy / sp * maxVelocity; }
+        p.vx *= 0.9; p.vy *= 0.9;
+        p.x += p.vx; p.y += p.vy;
+        // wrap
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+        // draw
+        ctx.fillStyle = 'rgba(181,54,255,0.7)'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+      });
+      // reset ripple after one frame
+      ripple = null;
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Fetch & render games (unchanged)
     const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
     const sleep = ms => new Promise(r => setTimeout(r, ms));
-
     const GAMES_API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
-    const RENDER_LIMIT = 4;
-    const THUMB_CACHE_KEY = 'thumbCache';
-
-    async function fetchGames() {
-      const res = await fetch(proxy(GAMES_API), { cache: 'no-store' });
-      if (!res.ok) throw new Error('Games HTTP ' + res.status);
-      return res.json();
-    }
-
-    async function fetchThumbnail(pid) {
-      const cache = JSON.parse(localStorage.getItem(THUMB_CACHE_KEY) || '{}');
-      if (cache[pid]) return cache[pid];
-      const url = `https://thumbnails.roblox.com/v1/assets?assetIds=${pid}&size=768x432&format=Png&isCircular=false`;
-      let imgUrl = '';
-      while (!imgUrl) {
-        try {
-          const r = await fetch(proxy(url), { cache: 'no-store' });
-          const j = await r.json();
-          imgUrl = j.data?.[0]?.imageUrl || '';
-        } catch {}
-        if (!imgUrl) await sleep(800);
-      }
-      cache[pid] = imgUrl;
-      localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(cache));
-      return imgUrl;
-    }
-
-    function createCard(game, imgUrl) {
-      const card = document.createElement('div'); card.className = 'card';
-      const inner = document.createElement('div'); inner.className = 'inner';
-      inner.addEventListener('mousemove', e => {
-        const r = inner.getBoundingClientRect();
-        const dx = ((e.clientX - r.left) / r.width - 0.5) * 8;
-        const dy = ((e.clientY - r.top) / r.height - 0.5) * -8;
-        inner.style.transform = `rotateY(${dx}deg) rotateX(${dy}deg)`;
-      });
-      inner.addEventListener('mouseleave', () => inner.style.transform = 'rotateY(0) rotateX(0)');
-
-      const img = document.createElement('img'); img.src = imgUrl; img.onerror = () => img.src = 'https://via.placeholder.com/768x432?text=No+Image';
-
-      const info = document.createElement('div'); info.className = 'info';
-      const createdDate = new Date(game.created);
-      const diffMs = Date.now() - createdDate.getTime();
-      const weeks = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 7));
-      let ageText;
-      if (weeks > 0) ageText = `${weeks} weeks ago`;
-      else {
-        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        ageText = days > 0 ? `${days} days ago` : 'now';
-      }
-      info.innerHTML = `
-        <h3><a href="https://www.roblox.com/games/${game.rootPlace.id}" target="_blank" rel="noopener">${game.name}</a></h3>
-        <p>${(game.description || 'No description').slice(0, 90)}</p>
-        <div class="age">🕒 ${ageText}</div>
-      `;
-      const playBtn = document.createElement('a'); playBtn.href = `roblox://placeId=${game.rootPlace.id}`; playBtn.className = 'btn'; playBtn.textContent = 'Play';
-      info.appendChild(playBtn);
-      inner.append(img, info);
-      card.appendChild(inner);
-      return card;
-    }
-
-    async function init() {
-      const grid = document.getElementById('grid');
-      let data;
-      while (true) {
-        try { data = await fetchGames(); break; } catch (e) { await sleep(800); }
-      }
-      const games = Array.isArray(data.data) ? data.data.slice(0, RENDER_LIMIT) : [];
-      const obs = new IntersectionObserver(entries => {
-        entries.forEach(({ target, isIntersecting }) => {
-          if (isIntersecting) { target.classList.add('visible'); obs.unobserve(target); }
-        });
-      }, { threshold: 0.1 });
-
-      for (const g of games) {
-        const card = createCard(g, 'https://via.placeholder.com/768x432?text=Loading...');
-        grid.appendChild(card); obs.observe(card);
-        try { card.querySelector('img').src = await fetchThumbnail(g.rootPlace.id); } catch {}
-      }
-
-      const copyBtn   = document.getElementById('copyBtn');
-      const copyLabel = document.getElementById('copyLabel');
-      copyBtn.addEventListener('click', async () => {
-        const text = copyLabel.textContent;
-        if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(text);
-        else { const inp = document.createElement('input'); inp.value = text; document.body.appendChild(inp); inp.select(); document.execCommand('copy'); document.body.removeChild(inp); }
-        copyLabel.textContent = 'Copied!'; setTimeout(() => copyLabel.textContent = 'its_turdle', 1500);
-      });
-    }
+    const RENDER_LIMIT = 4; const THUMB_KEY = 'thumbCache';
+    async function fetchGames() { const res = await fetch(proxy(GAMES_API),{cache:'no-store'}); if(!res.ok) throw new Error('Games HTTP '+res.status); return res.json(); }
+    async function fetchThumbnail(id){ const cache = JSON.parse(localStorage.getItem(THUMB_KEY)||'{}'); if(cache[id]) return cache[id]; const url = `https://thumbnails.roblox.com/v1/assets?assetIds=${id}&size=768x432&format=Png&isCircular=false`; let u=''; while(!u){ try{ const r=await fetch(proxy(url),{cache:'no-store'}), j=await r.json(); u=j.data?.[0]?.imageUrl||''; }catch{} if(!u) await sleep(800);} cache[id]=u; localStorage.setItem(THUMB_KEY,JSON.stringify(cache)); return u; }
+    function createCard(game,imgUrl){ const card=document.createElement('div'); card.className='card'; const inner=document.createElement('div'); inner.className='inner'; inner.addEventListener('mousemove',e=>{ const r=inner.getBoundingClientRect(), dx=(e.clientX-r.left)/r.width-0.5, dy=(e.clientY-r.top)/r.height-0.5; inner.style.transform=`rotateY(${dx*8}deg) rotateX(${dy*-8}deg)` }); inner.addEventListener('mouseleave',()=>inner.style.transform='rotateY(0) rotateX(0)'); const img=document.createElement('img'); img.src=imgUrl; img.onerror=()=>{img.src='https://via.placeholder.com/768x432?text=No+Image'}; const info=document.createElement('div'); info.className='info'; const diff=Date.now()-new Date(game.created).getTime(), weeks=Math.floor(diff/(1000*60*60*24*7)); let age=weeks>0?(weeks===1?'1 week ago':weeks+' weeks ago'):(()=>{ const d=Math.floor(diff/(1000*60*60*24)); return d>0?(d===1?'1 day ago':d+' days ago'):'now'})(); info.innerHTML=`<h3><a href="https://www.roblox.com/games/${game.rootPlace.id}" target="_blank" rel="noopener">${game.name}</a></h3><p>${(game.description||'No description').slice(0,90)}</p><div class="age">🕒 ${age}</div>`; const btn=document.createElement('a'); btn.href=`roblox://placeId=${game.rootPlace.id}`; btn.className='btn'; btn.textContent='Play'; info.appendChild(btn); inner.append(img,info); card.appendChild(inner); return card; }
+    async function init(){ const grid=document.getElementById('grid'); let data; while(true){ try{ data=await fetchGames(); break; }catch{ await sleep(800);} } const games=(Array.isArray(data.data)?data.data:data.data).slice(0, RENDER_LIMIT); const obs=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{ if(isIntersecting){target.classList.add('visible');obs.unobserve(target);} }),{threshold:0.1}); for(const g of games){ const c=createCard(g,'https://via.placeholder.com/768x432?text=Loading...'); grid.appendChild(c); obs.observe(c); try{ c.querySelector('img').src=await fetchThumbnail(g.rootPlace.id);}catch{} } const copyBtn=document.getElementById('copyBtn'), copyLabel=document.getElementById('copyLabel'); copyBtn.addEventListener('click',async()=>{ const t=copyLabel.textContent; if(navigator.clipboard&&navigator.clipboard.writeText) await navigator.clipboard.writeText(t); else{ const i=document.createElement('input'); i.value=t; document.body.appendChild(i); i.select(); document.execCommand('copy'); document.body.removeChild(i);} copyLabel.textContent='Copied!'; setTimeout(()=>copyLabel.textContent='its_turdle',1500); }); }
     document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
