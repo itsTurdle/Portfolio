@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Hey, I'm turdle👋">
-  <meta property="og:description" content="A 12,000 hour scripter.">
-  <meta property="og:url" content="https://itsTurdle.github.io/hire/">
-  
   <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>t u r d l e</title>
-  <link rel="icon" href="https://raw.githubusercontent.com/itsTurdle/Portfolio/refs/heads/main/favicon.ico">
+  <title>Roblox Games Portfolio</title>
+  <!-- Favicon -->
+  <link rel="icon" href="/path/to/your-icon.ico" type="image/x-icon" />
   <style>
     :root {
       --bg-dark: #0f0f12;
@@ -39,23 +36,8 @@
     .section-title { font-size: 2rem; color: var(--accent); text-shadow: var(--neon-glow); margin: 2rem 0 1rem; text-align: center; }
 
     /* Pricing */
-    .pricing-list {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      column-gap: 1.5rem;
-      list-style: none;
-      padding: 0;
-      margin: 0 auto 0.5rem;
-      max-width: 360px;
-      width: 100%;
-    }
-    .pricing-list li {
-      font-size: 1.1rem;
-      color: var(--accent);
-      font-weight: bold;
-      text-shadow: var(--neon-glow);
-      transition: transform .2s ease;
-    }
+    .pricing-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: 1.5rem; list-style: none; padding: 0; margin: 0 auto 0.5rem; max-width: 360px; width: 100%; }
+    .pricing-list li { font-size: 1.1rem; color: var(--accent); font-weight: bold; text-shadow: var(--neon-glow); transition: transform .2s ease; }
     .pricing-list li:nth-child(1) { text-align: right; }
     .pricing-list li:nth-child(2) { text-align: left; }
     .pricing-list li.glow { text-shadow: 0 0 10px var(--accent), 0 0 25px var(--accent), 0 0 40px var(--accent); }
@@ -85,7 +67,7 @@
     .info .btn { padding: .4rem .8rem; align-self: flex-start; }
 
     /* Contact */
-    .contact { width: 100%; max-width: 1200px; display: grid; grid-template-columns: repeat(2, minmax(280px, 1fr)); gap: 1.5rem; margin: 0.5rem auto 0; }
+    .contact { display: flex; flex-direction: column; align-items: center; gap: 1rem; width: 100%; max-width: 800px; margin: 0.5rem auto 0; }
   </style>
 </head>
 <body>
@@ -110,13 +92,11 @@
 
   <h2 class="section-title">Contact</h2>
   <div class="contact">
-    <a href="discord://-/users/862057084103163924" class="btn" target="_blank" rel="noopener">
-      <img src="https://cdn.discordapp.com/attachments/1073591315419373598/1366203987585404978/discord-white-icon.png?ex=6810181d&is=680ec69d&hm=15bcab0293a7739c549409f63034019e2ef817f773a37e8a39072a59092e1456&" alt="Discord">
-      Discord
+    <a href="discord://-/users/862057084103163924" class="btn">
+      <img src="discord.png" alt="Discord">Discord
     </a>
-    <button class="btn" id="copyBtn">
-      <img src="https://cdn.discordapp.com/attachments/1073591315419373598/1366204318218457129/link-xxl.png?ex=6810186c&is=680ec6ec&hm=4b81c1282873a493746b1bb4688a19db33116243ee5589b0252052386d35871c&" alt="Copy">
-      <span id="copyLabel">its_turdle</span>
+    <button type="button" class="btn" id="copyBtn">
+      <img src="link.png" alt="Copy"><span id="copyLabel">its_turdle</span>
     </button>
   </div>
 
@@ -126,7 +106,7 @@
     document.documentElement.style.setProperty('--accent', COLOR_THEME);
 
     /* Helpers */
-    const proxy = url => https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()};
+    const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
     const sleep = ms => new Promise(r => setTimeout(r, ms));
 
     /* API */
@@ -143,13 +123,13 @@
     async function fetchThumbnail(pid) {
       const cache = JSON.parse(localStorage.getItem(THUMB_CACHE_KEY) || '{}');
       if (cache[pid]) return cache[pid];
-      const url = https://thumbnails.roblox.com/v1/assets?assetIds=${pid}&size=768x432&format=Png&isCircular=false;
+      const url = `https://thumbnails.roblox.com/v1/assets?assetIds=${pid}&size=768x432&format=Png&isCircular=false`;
       let imgUrl = '';
       while (!imgUrl) {
         try {
           const r = await fetch(proxy(url), { cache: 'no-store' });
-          const j = await r.json();
-          imgUrl = j.data?.[0]?.imageUrl || '';
+          const data = await r.json();
+          imgUrl = data.data?.[0]?.imageUrl || '';
         } catch {}
         if (!imgUrl) await sleep(800);
       }
@@ -158,7 +138,6 @@
       return imgUrl;
     }
 
-    /* UI */
     function createCard(game, imgUrl) {
       const card = document.createElement('div'); card.className = 'card';
       const inner = document.createElement('div'); inner.className = 'inner';
@@ -166,67 +145,52 @@
         const r = inner.getBoundingClientRect();
         const dx = ((e.clientX - r.left) / r.width - 0.5) * 8;
         const dy = ((e.clientY - r.top) / r.height - 0.5) * -8;
-        inner.style.transform = rotateY(${dx}deg) rotateX(${dy}deg);
+        inner.style.transform = `rotateY(${dx}deg) rotateX(${dy}deg)`;
       });
       inner.addEventListener('mouseleave', () => inner.style.transform = 'rotateY(0) rotateX(0)');
 
-      const img = document.createElement('img'); img.src = imgUrl; img.onerror = () => img.src = 'https://via.placeholder.com/768x432?text=No+Image';
+      const img = document.createElement('img'); img.src = imgUrl;
+      img.onerror = () => img.src = 'https://cdn.jsdelivr.net/gh/yourusername/yourrepo/placeholder.png';
 
       const info = document.createElement('div'); info.className = 'info';
-      const visits = game.playCount ? game.playCount.toISOString ? game.playCount.toLocaleString() : game.playCount : 'N/A';
-      info.innerHTML = 
+      const visits = (typeof game.playCount === 'number') ? game.playCount.toLocaleString() : 'N/A';
+      info.innerHTML = `
         <h3><a href="https://www.roblox.com/games/${game.rootPlace.id}" target="_blank" rel="noopener">${game.name}</a></h3>
         <p>${(game.description || 'No description').slice(0, 90)}</p>
         <div class="visits">👁️ ${visits} visits</div>
-      ;
-      const playBtn = document.createElement('a'); playBtn.href = roblox://placeId=${game.rootPlace.id}; playBtn.className = 'btn'; playBtn.textContent = 'Play';
-      info.appendChild(playBtn);
-      inner.append(img, info); card.appendChild(inner);
+      `;
+      const playBtn = document.createElement('a'); playBtn.href = `roblox://placeId=${game.rootPlace.id}`; playBtn.className = 'btn'; playBtn.textContent = 'Play';
+      info.appendChild(playBtn); inner.append(img, info); card.appendChild(inner);
       return card;
     }
 
     async function init() {
       const grid = document.getElementById('grid');
       try {
-        const data = await fetchGames();
-        const games = Array.isArray(data.data) ? data.data.slice(0, RENDER_LIMIT) : [];
+        const { data } = await fetchGames();
+        const games = Array.isArray(data) ? data.slice(0, RENDER_LIMIT) : [];
         const obs = new IntersectionObserver(entries => {
-          entries.forEach(({ target, isIntersecting }) => {
-            if (isIntersecting) { target.classList.add('visible'); obs.unobserve(target); }
-          });
+          entries.forEach(({ target, isIntersecting }) => { if (isIntersecting) { target.classList.add('visible'); obs.unobserve(target); }});
         }, { threshold: 0.1 });
-
         for (const g of games) {
-          const card = createCard(g, 'https://via.placeholder.com/768x432?text=Loading...');
-          grid.appendChild(card); obs.observe(card);
+          const card = createCard(g, 'https://via.placeholder.com/768x432?text=Loading...'); grid.appendChild(card); obs.observe(card);
           card.querySelector('img').src = await fetchThumbnail(g.rootPlace.id);
         }
       } catch (e) { console.error(e); }
 
-    const copyBtn   = document.getElementById('copyBtn');
-    const copyLabel = document.getElementById('copyLabel');
-
-    copyBtn.addEventListener('click', async () => {
-        // Get the text to copy
-        const text = copyLabel.textContent;
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(text);
-        } else {
-            const inp = document.createElement('input');
-            inp.value = text;
-            document.body.appendChild(inp);
-            inp.select();
-            document.execCommand('copy');
-            document.body.removeChild(inp);
+      const COPY_TEXT = 'its_turdle';
+      const copyBtn   = document.getElementById('copyBtn');
+      const copyLabel = document.getElementById('copyLabel');
+      copyBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+          await navigator.clipboard.writeText(COPY_TEXT);
+        } catch {
+          const inp = document.createElement('input'); inp.value = COPY_TEXT; document.body.appendChild(inp); inp.select(); document.execCommand('copy'); document.body.removeChild(inp);
         }
-
-        // Feedback
         copyLabel.textContent = 'Copied!';
-        setTimeout(() => {
-            copyLabel.textContent = 'its_turdle';
-        }, 1500);
-    });
+        setTimeout(() => { copyLabel.textContent = COPY_TEXT; }, 1500);
+      });
     }
     document.addEventListener('DOMContentLoaded', init);
   </script>
