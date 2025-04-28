@@ -229,8 +229,8 @@ header h1 {
     const inner = document.createElement('div'); inner.className = 'inner';
     inner.addEventListener('mousemove', e => {
       const r = inner.getBoundingClientRect();
-      const dx = ((e.clientX - r.left) / r.width - 0.5) * 20;
-      const dy = ((e.clientY - r.top) / r.height - 0.5) * -20;
+      const dx = ((e.clientX - r.left) / r.width - 0.5) * 10;
+      const dy = ((e.clientY - r.top) / r.height - 0.5) * -10;
       inner.style.transform = `rotateY(${dx}deg) rotateX(${dy}deg)`;
     });
     inner.addEventListener('mouseleave', () => inner.style.transform = 'rotateY(0) rotateX(0)');
