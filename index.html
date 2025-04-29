@@ -4,21 +4,26 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Roblox Games Portfolio</title>
+  <title>t u r d l e</title></title>
   <!-- Favicon -->
-  <link rel="icon" href="/path/to/your-icon.ico" type="image/x-icon" />
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   <style>
+    /* Root variables */
     :root {
       --bg-dark: #0f0f12;
-      --card-bg: rgba(20,20,30,0.7);
+      --card-bg: rgba(20, 20, 30, 0.7);
       --text-light: #e0e0e0;
       --accent: #b536ff;
-      --glow-accent: rgba(181,54,255,0.6);
+      --glow-accent: rgba(181, 54, 255, 0.6);
       --neon-glow: 0 0 8px var(--accent), 0 0 20px var(--accent);
     }
+
+    /* Global resets */
     * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; overflow: auto; }
+
+    /* Body styling */
     body {
-      margin: 0;
       font-family: system-ui, Arial, sans-serif;
       background: var(--bg-dark);
       color: var(--text-light);
@@ -27,40 +32,199 @@
       align-items: center;
       min-height: 100vh;
       padding: 2rem;
+      position: relative;
       cursor: url('custom-cursor.png'), auto;
+      z-index: 1;
     }
-    .highlight { text-shadow: var(--neon-glow); color: var(--accent); }
-    header { text-align: center; margin-bottom: 2rem; }
-    header h1 { margin: 0; font-size: 2.5rem; color: var(--accent); text-shadow: var(--neon-glow); }
-    .skills-list { list-style: disc; padding-left: 1.5rem; margin-top: 1rem; display: inline-block; text-align: left; }
+
+    /* Background canvas */
+    
+    }
+
+    /* Highlighted text */
+    .highlight {
+      color: var(--accent);
+      text-shadow: var(--neon-glow);
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      z-index: 1;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      color: var(--accent);
+      text-shadow: var(--neon-glow);
+    }
+
+    /* Skills list */
+    .skills-list {
+      list-style: disc;
+      padding-left: 1.5rem;
+      margin-top: 1rem;
+      display: inline-block;
+      text-align: left;
+    }
     .skills-list li { margin-bottom: 0.75rem; }
-    .section-title { font-size: 2rem; color: var(--accent); text-shadow: var(--neon-glow); margin: 2rem 0 1rem; text-align: center; }
-    .pricing-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; list-style: none; padding: 0; margin: 0 auto 0.5rem; max-width: 360px; width: 100%; }
-    .pricing-list li { font-size: 1.1rem; color: var(--accent); font-weight: bold; text-shadow: var(--neon-glow); transition: transform .2s ease; }
+
+    /* Section titles */
+    .section-title {
+      font-size: 2rem;
+      color: var(--accent);
+      text-shadow: var(--neon-glow);
+      margin: 2rem 0 1rem;
+      text-align: center;
+      z-index: 1;
+    }
+
+    /* Pricing list */
+    .pricing-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      list-style: none;
+      padding: 0;
+      margin: 0 auto 0.5rem;
+      max-width: 360px;
+      width: 100%;
+      z-index: 1;
+    }
+    .pricing-list li {
+      font-size: 1.1rem;
+      color: var(--accent);
+      font-weight: bold;
+      text-shadow: var(--neon-glow);
+      transition: transform 0.2s;
+    }
     .pricing-list li:nth-child(1) { text-align: right; }
     .pricing-list li:nth-child(2) { text-align: left; }
-    .pricing-list li.glow { text-shadow: 0 0 10px var(--accent), 0 0 25px var(--accent), 0 0 40px var(--accent); }
+    .pricing-list li.glow {
+      text-shadow: 0 0 10px var(--accent), 0 0 25px var(--accent), 0 0 40px var(--accent);
+    }
     .pricing-list li:hover { transform: translateY(-4px); }
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .5rem 1rem; background: var(--accent); color: #fff; border: none; border-radius: 999px; font-size: 1rem; cursor: pointer; text-decoration: none; box-shadow: var(--neon-glow); transition: box-shadow .2s ease, transform .2s ease; }
-    .btn:hover { box-shadow: 0 0 30px var(--accent); transform: translateY(-2px); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: var(--neon-glow);
+      transition: box-shadow 0.2s, transform 0.2s;
+      z-index: 1;
+    }
+    .btn:hover {
+      box-shadow: 0 0 30px var(--accent);
+      transform: translateY(-2px);
+    }
     .btn img { width: 18px; height: 18px; pointer-events: none; }
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(280px,1fr)); gap: 1.5rem; width: 100%; max-width: 1200px; }
-    @media(max-width:600px){ .grid, .contact{ grid-template-columns:1fr; } }
-    .card { height: 360px; perspective: 1000px; opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+
+    /* Game grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(280px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1200px;
+      z-index: 1;
+    }
+    @media (max-width: 600px) {
+      .grid, .contact { grid-template-columns: 1fr; }
+    }
+
+    /* Card styles */
+    .card {
+      height: 360px;
+      perspective: 1000px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s, transform 0.6s;
+    }
     .card.visible { opacity: 1; transform: translateY(0); }
-    .inner { display: flex; flex-direction: column; height: 100%; overflow: hidden; border-radius: 16px; background: var(--card-bg); box-shadow: 0 0 10px var(--glow-accent); transition: transform .2s ease, box-shadow .2s ease; }
+
+    .inner {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 16px;
+      background: var(--card-bg);
+      box-shadow: 0 0 10px var(--glow-accent);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
     .inner:hover { box-shadow: 0 0 20px var(--glow-accent); }
-    .inner img { width:100%; height:180px; object-fit:cover; }
-    .info { flex:1; display:flex; flex-direction:column; justify-content:space-between; padding:1rem; }
-    .info h3{ margin:0 0 .5rem; font-size:1.2rem; }
-    .info h3 a{ color:var(--accent); text-decoration:none; text-shadow:var(--neon-glow);} 
-    .info h3 a:hover{text-decoration:underline;}
-    .info p{ margin:0 0 .5rem; font-size:.9rem; line-height:1.3; }
-    .timeframe{ font-size:.85rem; margin-bottom:.75rem; }
-    .contact{ display:flex; flex-direction:column; align-items:center; gap:1rem; width:100%; max-width:800px; margin:.5rem auto 0; }
+
+    .inner img:not(.loading) {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .inner img.loading {
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1rem;
+    }
+    .info h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1.2rem;
+    }
+    .info h3 a {
+      color: var(--accent);
+      text-decoration: none;
+      text-shadow: var(--neon-glow);
+    }
+    .info h3 a:hover { text-decoration: underline; }
+    .info p {
+      margin: 0 0 0.5rem;
+      font-size: 0.9rem;
+      line-height: 1.3;
+    }
+    .timeframe {
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+    }
+    .contact {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      max-width: 800px;
+      margin: 0.5rem auto 0;
+      z-index: 1;
+    }
   </style>
 </head>
 <body>
+  
   <header>
     <h1>I'm turdle, a Scripter</h1>
     <ul class="skills-list">
@@ -68,61 +232,45 @@
       <li>I specialize in designing <span class="highlight">intuitive user interfaces</span> and <span class="highlight">robust backend systems</span>.</li>
       <li>I excel at building <span class="highlight">environments</span>, developing <span class="highlight">UI layouts</span>, and managing <span class="highlight">server infrastructure</span>.</li>
       <li>I operate on a <span class="highlight">flexible schedule</span>, working primarily in the Eastern Time Zone.</li>
-      <li>I focus my work on <span class="highlight">backend logic</span> and <span class="highlight">user interface design</span>, rather than combat mechanics.</li>
+      <li>I focus on <span class="highlight">backend logic</span> and <span class="highlight">UI design</span>, not combat mechanics.</li>
     </ul>
   </header>
+
   <div class="grid" id="grid"></div>
+
   <h2 class="section-title">Pricing</h2>
   <ul class="pricing-list">
     <li class="glow">Per Task<br>$5 - $25</li>
     <li>Percentage<br>Negotiable</li>
   </ul>
+
   <h2 class="section-title">Contact</h2>
   <div class="contact">
     <a href="discord://-/users/862057084103163924" class="btn"><img src="discord.png" alt="Discord">Discord</a>
     <button id="copyBtn" class="btn"><img src="link.png" alt="Copy"><span id="copyLabel">its_turdle</span></button>
   </div>
+
   <script>
-    // Fix proxy string interpolation: include raw URL after slash
-    const proxy = url => `https://cors.bridged.cc/${url}`;
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
-    function formatTimeframe(created) {
-      const now = new Date();
-      const then = new Date(created);
-      const diff = now - then;
-      const msDay = 86400000;
-      const msWeek = msDay * 7;
-      const msMonth = msDay * 30;
-      const months = Math.floor(diff / msMonth);
-      if (months > 0) return { emoji: '📅', text: `${months} month${months === 1 ? '' : 's'} ago` };
-      const weeks = Math.floor(diff / msWeek);
-      if (weeks > 0) return { emoji: '📅', text: `${weeks} week${weeks === 1 ? '' : 's'} ago` };
-      const days = Math.floor(diff / msDay);
-      if (days > 0) return { emoji: '🕒', text: `${days} day${days === 1 ? '' : 's'} ago` };
-      return { emoji: '🕒', text: 'just now' };
-    }
-    const GAMES_API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
-    const RENDER_LIMIT = 4;
+    // Portfolio grid init
+    const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
     async function fetchGames() {
-      const res = await fetch(proxy(GAMES_API), { cache: 'no-store' });
+      const res = await fetch(proxy('https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10'), { cache: 'no-store' });
       if (!res.ok) throw new Error('Games HTTP ' + res.status);
       return res.json();
     }
     async function fetchThumbnail(pid) {
-      const url = `https://thumbnails.roblox.com/v1/assets?assetIds=${pid}&size=768x432&format=png&isCircular=false`;
-      let imgUrl = '';
-      while (!imgUrl) {
-        try {
-          const r = await fetch(proxy(url), { cache: 'no-store' });
-          const data = await r.json();
-          imgUrl = data.data?.[0]?.imageUrl || '';
-        } catch {}
-        if (!imgUrl) await sleep(800);
-      }
-      return imgUrl;
+      const key = `thumb_${pid}`;
+      const cached = localStorage.getItem(key);
+      if (cached) return cached;
+      const res = await fetch(proxy(`https://thumbnails.roblox.com/v1/assets?assetIds=${pid}&size=768x432&format=png&isCircular=false`), { cache: 'no-store' });
+      if (!res.ok) throw new Error('Thumb HTTP ' + res.status);
+      const data = await res.json();
+      const url = data.data?.[0]?.imageUrl || 'placeholder.png';
+      localStorage.setItem(key, url);
+      return url;
     }
-    function createCard(game, imgUrl) {
-      const card = document.createElement('div'); card.className = 'card';
+    function createCard(game) {
+      const card = document.createElement('div'); card.className = 'card visible';
       const inner = document.createElement('div'); inner.className = 'inner';
       inner.addEventListener('mousemove', e => {
         const r = inner.getBoundingClientRect();
@@ -131,44 +279,38 @@
         inner.style.transform = `rotateY(${dx}deg) rotateX(${dy}deg)`;
       });
       inner.addEventListener('mouseleave', () => inner.style.transform = '');
-      const img = document.createElement('img'); img.src = imgUrl;
-      img.onerror = () => img.src = 'placeholder.png';
+
+      const img = document.createElement('img'); img.src = 'loading.png'; img.classList.add('loading'); inner.appendChild(img);
+      fetchThumbnail(game.rootPlace.id).then(src => { img.src = src; img.classList.remove('loading'); }).catch(() => { img.src = 'placeholder.png'; img.classList.remove('loading'); });
+
       const info = document.createElement('div'); info.className = 'info';
-      const { emoji, text } = formatTimeframe(game.created);
+      const { emoji, text } = (() => {
+        const now = new Date(), then = new Date(game.created), diff = now - then;
+        const day = 864e5, week = 7 * day, month = 30 * day;
+        if (diff >= month) return { emoji: '📅', text: `${Math.floor(diff / month)} month${Math.floor(diff / month) > 1 ? 's' : ''} ago` };
+        if (diff >= week) return { emoji: '📅', text: `${Math.floor(diff / week)} week${Math.floor(diff / week) > 1 ? 's' : ''} ago` };
+        if (diff >= day) return { emoji: '🕒', text: `${Math.floor(diff / day)} day${Math.floor(diff / day) > 1 ? 's' : ''} ago` };
+        return { emoji: '🕒', text: 'just now' };
+      })();
       info.innerHTML = `
         <h3><a href="https://www.roblox.com/games/${game.rootPlace.id}" target="_blank" rel="noopener">${game.name}</a></h3>
         <p>${(game.description || 'No description').slice(0, 90)}</p>
         <div class="timeframe highlight">${emoji} ${text}</div>
       `;
-      const playBtn = document.createElement('a'); playBtn.href = `roblox://placeId=${game.rootPlace.id}`; playBtn.className = 'btn'; playBtn.textContent = 'Play';
-      info.appendChild(playBtn);
-      inner.append(img, info);
-      card.appendChild(inner);
-      return card;
+      const playBtn = document.createElement('a'); playBtn.href = `roblox://placeId=${game.rootPlace.id}`; playBtn.className = 'btn'; playBtn.textContent = 'Play'; info.appendChild(playBtn);
+      inner.appendChild(info); card.appendChild(inner); return card;
     }
     async function init() {
       const grid = document.getElementById('grid');
       try {
         const { data } = await fetchGames();
-        const games = Array.isArray(data) ? data.slice(0, RENDER_LIMIT) : [];
-        const obs = new IntersectionObserver(entries => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible'); obs.unobserve(entry.target);
-            }
-          });
-        }, { threshold: 0.1 });
-        const thumbs = await Promise.all(games.map(g => fetchThumbnail(g.rootPlace.id)));
-        games.forEach((g, i) => {
-          const thumb = thumbs[i];
-          const card = createCard(g, thumb);
-          grid.appendChild(card); obs.observe(card);
-        });
+        (data || []).slice(0, 4).forEach(g => grid.appendChild(createCard(g)));
       } catch (e) { console.error(e); }
-      const copyBtn = document.getElementById('copyBtn'); const copyLabel = document.getElementById('copyLabel');
-      copyBtn.addEventListener('click', async e => { e.preventDefault();
+      const copyBtn = document.getElementById('copyBtn'), copyLabel = document.getElementById('copyLabel');
+      copyBtn.addEventListener('click', async e => {
+        e.preventDefault();
         try { await navigator.clipboard.writeText('its_turdle'); } catch {
-          const inp = document.createElement('input'); inp.value = 'its_turdle'; document.body.appendChild(inp); inp.select(); document.execCommand('copy'); document.body.removeChild(inp);
+          const tmp = document.createElement('input'); tmp.value = 'its_turdle'; document.body.appendChild(tmp); tmp.select(); document.execCommand('copy'); document.body.removeChild(tmp);
         }
         copyLabel.textContent = 'Copied!'; setTimeout(() => copyLabel.textContent = 'its_turdle', 1500);
       });
