@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>t u r d l e</title></title>
+  <title>t u r d l e</title>
   <!-- Favicon -->
-  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <style>
     /* Root variables */
     :root {
@@ -37,12 +37,17 @@
       z-index: 1;
     }
 
-    /* Background canvas */
-    
+    /* Background canvas - no canvas used */
+    /* end Background canvas */
+
+    /* Highlighted text: purple text with glow only */
+    .highlight {
+      color: var(--accent);
+      text-shadow: var(--neon-glow);
     }
 
-    /* Highlighted text */
-    .highlight {
+    /* Timeframe highlight: purple glow like pricing */
+    .timeframe.highlight {
       color: var(--accent);
       text-shadow: var(--neon-glow);
     }
@@ -121,6 +126,7 @@
       cursor: pointer;
       box-shadow: var(--neon-glow);
       transition: box-shadow 0.2s, transform 0.2s;
+      text-decoration: none;
       z-index: 1;
     }
     .btn:hover {
@@ -230,7 +236,7 @@
     <ul class="skills-list">
       <li>I have logged over <span class="highlight">12,000 hours</span> crafting scripts for <span class="highlight">diverse applications</span>.</li>
       <li>I specialize in designing <span class="highlight">intuitive user interfaces</span> and <span class="highlight">robust backend systems</span>.</li>
-      <li>I excel at building <span class="highlight">environments</span>, developing <span class="highlight">UI layouts</span>, and managing <span class="highlight">server infrastructure</span>.</li>
+      <li>I excel at building <span class="highlight">environments</span> and developing <span class="highlight">user interface</span>.</li>
       <li>I operate on a <span class="highlight">flexible schedule</span>, working primarily in the Eastern Time Zone.</li>
       <li>I focus on <span class="highlight">backend logic</span> and <span class="highlight">UI design</span>, not combat mechanics.</li>
     </ul>
