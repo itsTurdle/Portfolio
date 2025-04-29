@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>t u r d l e</title>
   <!-- Favicon -->
-  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <style>
     /* Root variables */
     :root {
@@ -39,7 +39,7 @@
 
     /* Background canvas */
     canvas#bgCanvas {
-      position: fixed;
+      position: absolute; /* scrolls with the page */
       top: 0;
       left: 0;
       width: 100%;
@@ -270,7 +270,7 @@
       resize();
 
       const NODES = [],
-        COUNT = 80,
+        COUNT = 150,
         RADIUS = 130,
         MAX_SPEED = 2,
         CONNECT_DIST = 100,
