@@ -52,7 +52,7 @@
     .inner:hover { box-shadow: 0 0 20px var(--glow-accent); }
     .inner img:not(.loading) { width: 100%; height: 180px; object-fit: cover; display: block; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .inner img.loading { width: 40px; height: 40px; object-fit: none; animation: spin 1s linear infinite; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .inner img.loading { width: 40px; height: 40px; animation: spin 1s linear infinite; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
     .info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem; }
     .info h3 { margin: 0 0 .5rem; font-size: 1.2rem; }
     .info h3 a { color: var(--accent); text-decoration: none; text-shadow: var(--neon-glow); }
@@ -85,29 +85,32 @@
     <button id="copyBtn" class="btn"><img src="link.png" alt="Copy"><span id="copyLabel">its_turdle</span></button>
   </div>
   <script>
-    // Use correct proxy endpoint for CORS
     const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
     function formatTimeframe(created) {
       const now = new Date();
       const then = new Date(created);
       const diff = now - then;
-      const msDay = 86400000;
-      const msWeek = msDay * 7;
-      const msMonth = msDay * 30;
-      const months = Math.floor(diff / msMonth);
-      if (months > 0) return { emoji: '📅', text: `${months} month${months === 1 ? '' : 's'} ago` };
-      const weeks = Math.floor(diff / msWeek);
-      if (weeks > 0) return { emoji: '📅', text: `${weeks} week${weeks === 1 ? '' : 's'} ago` };
-      const days = Math.floor(diff / msDay);
-      if (days > 0) return { emoji: '🕒', text: `${days} day${days === 1 ? '' : 's'} ago` };
+      const MS_DAY = 86400000;
+      const MS_WEEK = MS_DAY * 7;
+      const MS_MONTH = MS_DAY * 30;
+      if (diff >= MS_MONTH) {
+        const m = Math.floor(diff / MS_MONTH);
+        return { emoji: '📅', text: `${m} month${m>1?'s':''} ago` };
+      }
+      if (diff >= MS_WEEK) {
+        const w = Math.floor(diff / MS_WEEK);
+        return { emoji: '📅', text: `${w} week${w>1?'s':''} ago` };
+      }
+      if (diff >= MS_DAY) {
+        const d = Math.floor(diff / MS_DAY);
+        return { emoji: '🕒', text: `${d} day${d>1?'s':''} ago` };
+      }
       return { emoji: '🕒', text: 'just now' };
     }
-    const GAMES_API = 'https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10';
-    const RENDER_LIMIT = 4;
 
     async function fetchGames() {
-      const res = await fetch(proxy(GAMES_API), { cache: 'no-store' });
+      const res = await fetch(proxy('https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10'), { cache: 'no-store' });
       if (!res.ok) throw new Error('Games HTTP ' + res.status);
       return res.json();
     }
@@ -116,22 +119,22 @@
       const key = `thumb_${pid}`;
       const cached = localStorage.getItem(key);
       if (cached) return cached;
-      const url = `https://thumbnails.roblox.com/v1/assets?assetIds=${pid}&size=768x432&format=png&isCircular=false`;
-      const res = await fetch(proxy(url), { cache: 'no-store' });
+      const apiURL = `https://thumbnails.roblox.com/v1/assets?assetIds=${pid}&size=768x432&format=png&isCircular=false`;
+      const res = await fetch(proxy(apiURL), { cache: 'no-store' });
       if (!res.ok) throw new Error('Thumb HTTP ' + res.status);
       const data = await res.json();
-      const imgUrl = data.data?.[0]?.imageUrl || 'placeholder.png';
-      localStorage.setItem(key, imgUrl);
-      return imgUrl;
+      const src = data.data?.[0]?.imageUrl || 'placeholder.png';
+      localStorage.setItem(key, src);
+      return src;
     }
 
     function createCard(game) {
       const card = document.createElement('div'); card.className = 'card visible';
       const inner = document.createElement('div'); inner.className = 'inner';
       inner.addEventListener('mousemove', e => {
-        const r = inner.getBoundingClientRect();
-        const dx = ((e.clientX - r.left) / r.width - 0.5) * 8;
-        const dy = ((e.clientY - r.top) / r.height - 0.5) * -8;
+        const rect = inner.getBoundingClientRect();
+        const dx = ((e.clientX - rect.left)/rect.width - 0.5) * 8;
+        const dy = ((e.clientY - rect.top)/rect.height - 0.5) * -8;
         inner.style.transform = `rotateY(${dx}deg) rotateX(${dy}deg)`;
       });
       inner.addEventListener('mouseleave', () => inner.style.transform = '');
@@ -150,9 +153,12 @@
       info.innerHTML = `
         <h3><a href="https://www.roblox.com/games/${game.rootPlace.id}" target="_blank" rel="noopener">${game.name}</a></h3>
         <p>${(game.description || 'No description').slice(0, 90)}</p>
-        <div class=\"timeframe highlight\">${emoji} ${text}</div>
+        <div class="timeframe highlight">${emoji} ${text}</div>
       `;
-      const playBtn = document.createElement('a'); playBtn.href = `roblox://placeId=${game.rootPlace.id}`; playBtn.className = 'btn'; playBtn.textContent = 'Play';
+      const playBtn = document.createElement('a');
+      playBtn.href = `roblox://placeId=${game.rootPlace.id}`;
+      playBtn.className = 'btn';
+      playBtn.textContent = 'Play';
       info.appendChild(playBtn);
       inner.appendChild(info);
       card.appendChild(inner);
@@ -163,11 +169,8 @@
       const grid = document.getElementById('grid');
       try {
         const { data } = await fetchGames();
-        data.slice(0, RENDER_LIMIT).forEach(game => {
-          const card = createCard(game);
-          grid.appendChild(card);
-        });
-      } catch (e) { console.error(e); }
+        (data || []).slice(0,4).forEach(g => grid.appendChild(createCard(g)));
+      } catch(e) { console.error(e); }
 
       const copyBtn = document.getElementById('copyBtn');
       const copyLabel = document.getElementById('copyLabel');
@@ -175,8 +178,8 @@
         e.preventDefault();
         try { await navigator.clipboard.writeText('its_turdle'); }
         catch {
-          const inp = document.createElement('input'); inp.value = 'its_turdle';
-          document.body.appendChild(inp); inp.select(); document.execCommand('copy'); document.body.removeChild(inp);
+          const tmp = document.createElement('input'); tmp.value = 'its_turdle'; document.body.appendChild(tmp);
+          tmp.select(); document.execCommand('copy'); document.body.removeChild(tmp);
         }
         copyLabel.textContent = 'Copied!';
         setTimeout(() => { copyLabel.textContent = 'its_turdle'; }, 1500);
