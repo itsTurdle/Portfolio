@@ -286,6 +286,16 @@
       return url;
     }
 
+    // must appear before init()
+    async function fetchGames() {
+      const res = await fetch(
+        proxy('https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10'),
+        { cache: 'no-store' }
+      );
+      if (!res.ok) throw new Error('Games HTTP ' + res.status);
+      return res.json();
+    }
+
     function createCard(game) {
       const card = document.createElement('div'); card.className = 'card visible';
       const inner = document.createElement('div'); inner.className = 'inner';
