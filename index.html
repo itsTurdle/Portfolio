@@ -276,9 +276,9 @@
           url = data.data?.[0]?.imageUrl;
           // If URL is valid and not placeholder, break out
           if (url && !url.includes('placeholder')) break;
-    } catch (err) {
-      console.warn('Thumbnail fetch failed, retrying...', err);
-    }
+      } catch (err) {
+        console.warn('Thumbnail fetch failed, retrying...', err);
+      }
       await new Promise(resolve => setTimeout(resolve, 500));
     }
 
