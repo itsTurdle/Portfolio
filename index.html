@@ -314,10 +314,10 @@
       const { emoji, text } = (() => {
         const now = new Date(), then = new Date(game.created), diff = now - then;
         const day = 864e5, week = 7 * day, month = 30 * day;
-        if (diff >= month) return { emoji: '📅', text: `${Math.floor(diff / month)} month${Math.floor(diff / month) > 1 ? 's' : ''} ago` };
+        if (diff >= month) return { emoji: '👴', text: `${Math.floor(diff / month)} month${Math.floor(diff / month) > 1 ? 's' : ''} ago` };
         if (diff >= week) return { emoji: '📅', text: `${Math.floor(diff / week)} week${Math.floor(diff / week) > 1 ? 's' : ''} ago` };
         if (diff >= day) return { emoji: '🕒', text: `${Math.floor(diff / day)} day${Math.floor(diff / day) > 1 ? 's' : ''} ago` };
-        return { emoji: '🕒', text: 'Just Now' };
+        return { emoji: '⏲️', text: 'Just Now' };
       })();
       info.innerHTML = `
         <h3><a href="https://www.roblox.com/games/${game.rootPlace.id}" target="_blank" rel="noopener">${game.name}</a></h3>
