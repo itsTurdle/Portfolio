@@ -259,22 +259,33 @@
   <script>
     // Portfolio grid init
     const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
-    async function fetchGames() {
-      const res = await fetch(proxy('https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10'), { cache: 'no-store' });
-      if (!res.ok) throw new Error('Games HTTP ' + res.status);
-      return res.json();
-    }
     async function fetchThumbnail(pid) {
       const key = `thumb_${pid}`;
       const cached = localStorage.getItem(key);
       if (cached) return cached;
-      const res = await fetch(proxy(`https://thumbnails.roblox.com/v1/assets?assetIds=${pid}&size=768x432&format=png&isCircular=false`), { cache: 'no-store' });
-      if (!res.ok) throw new Error('Thumb HTTP ' + res.status);
-      const data = await res.json();
-      const url = data.data?.[0]?.imageUrl || 'placeholder.png';
+
+      let url;
+      // Keep trying until we get a valid image URL
+      while (true) {
+        try {
+          const res = await fetch(proxy(
+            `https://thumbnails.roblox.com/v1/assets?assetIds=${pid}&size=768x432&format=png&isCircular=false`
+          ), { cache: 'no-store' });
+          if (!res.ok) throw new Error('Thumb HTTP ' + res.status);
+          const data = await res.json();
+          url = data.data?.[0]?.imageUrl;
+          // If URL is valid and not placeholder, break out
+          if (url && !url.includes('placeholder')) break;
+    } catch (err) {
+      console.warn('Thumbnail fetch failed, retrying...', err);
+    }
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
       localStorage.setItem(key, url);
       return url;
     }
+
     function createCard(game) {
       const card = document.createElement('div'); card.className = 'card visible';
       const inner = document.createElement('div'); inner.className = 'inner';
