@@ -5,10 +5,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>t u r d l e</title>
-  <!-- Favicon -->
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <style>
-    /* Root variables */
     :root {
       --bg-dark: #0f0f12;
       --card-bg: rgba(20, 20, 30, 0.7);
@@ -17,12 +15,8 @@
       --glow-accent: rgba(181, 54, 255, 0.6);
       --neon-glow: 0 0 8px var(--accent), 0 0 20px var(--accent);
     }
-
-    /* Global resets */
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; overflow: auto; }
-
-    /* Body styling */
     body {
       font-family: system-ui, Arial, sans-serif;
       background: var(--bg-dark);
@@ -36,23 +30,14 @@
       cursor: url('custom-cursor.png'), auto;
       z-index: 1;
     }
-
-    /* Background canvas - no canvas used */
-    /* end Background canvas */
-
-    /* Highlighted text: purple text with glow only */
     .highlight {
       color: var(--accent);
       text-shadow: var(--neon-glow);
     }
-
-    /* Timeframe highlight: purple glow like pricing */
     .timeframe.highlight {
       color: var(--accent);
       text-shadow: var(--neon-glow);
     }
-
-    /* Header */
     header {
       text-align: center;
       margin-bottom: 2rem;
@@ -64,8 +49,6 @@
       color: var(--accent);
       text-shadow: var(--neon-glow);
     }
-
-    /* Skills list */
     .skills-list {
       list-style: disc;
       padding-left: 1.5rem;
@@ -74,8 +57,6 @@
       text-align: left;
     }
     .skills-list li { margin-bottom: 0.75rem; }
-
-    /* Section titles */
     .section-title {
       font-size: 2rem;
       color: var(--accent);
@@ -84,8 +65,6 @@
       text-align: center;
       z-index: 1;
     }
-
-    /* Pricing list */
     .pricing-list {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -110,8 +89,6 @@
       text-shadow: 0 0 10px var(--accent), 0 0 25px var(--accent), 0 0 40px var(--accent);
     }
     .pricing-list li:hover { transform: translateY(-4px); }
-
-    /* Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -134,8 +111,18 @@
       transform: translateY(-2px);
     }
     .btn img { width: 18px; height: 18px; pointer-events: none; }
-
-    /* Game grid */
+    .featured-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 2rem;
+      z-index: 1;
+    }
+    .featured-grid .card {
+      height: 420px;
+    }
     .grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(280px, 1fr));
@@ -147,8 +134,6 @@
     @media (max-width: 600px) {
       .grid, .contact { grid-template-columns: 1fr; }
     }
-
-    /* Card styles */
     .card {
       height: 360px;
       perspective: 1000px;
@@ -156,8 +141,10 @@
       transform: translateY(30px);
       transition: opacity 0.6s, transform 0.6s;
     }
-    .card.visible { opacity: 1; transform: translateY(0); }
-
+    .card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
     .inner {
       display: flex;
       flex-direction: column;
@@ -170,7 +157,6 @@
       position: relative;
     }
     .inner:hover { box-shadow: 0 0 20px var(--glow-accent); }
-
     .inner img:not(.loading) {
       width: 100%;
       height: 180px;
@@ -190,7 +176,6 @@
       left: 50%;
       transform: translate(-50%, -50%);
     }
-
     .info {
       flex: 1;
       display: flex;
@@ -230,7 +215,6 @@
   </style>
 </head>
 <body>
-  
   <header>
     <h1>I'm turdle, a Scripter</h1>
     <ul class="skills-list">
@@ -240,6 +224,7 @@
     </ul>
   </header>
 
+  <div class="featured-grid" id="featured-grid"></div>
   <div class="grid" id="grid"></div>
 
   <h2 class="section-title">Pricing</h2>
@@ -255,15 +240,14 @@
   </div>
 
   <script>
-    // Portfolio grid init
+    const featuredIds = [/* add your game ids here, e.g. 1914390459, 1234567890 */];
     const proxy = url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&cb=${Date.now()}`;
+
     async function fetchThumbnail(pid) {
       const key = `thumb_${pid}`;
       const cached = localStorage.getItem(key);
       if (cached) return cached;
-
       let url;
-      // Keep trying until we get a valid image URL
       while (true) {
         try {
           const res = await fetch(proxy(
@@ -272,19 +256,16 @@
           if (!res.ok) throw new Error('Thumb HTTP ' + res.status);
           const data = await res.json();
           url = data.data?.[0]?.imageUrl;
-          // If URL is valid and not placeholder, break out
           if (url && !url.includes('placeholder')) break;
-      } catch (err) {
-        console.warn('Thumbnail fetch failed, retrying...', err);
+        } catch (err) {
+          console.warn('Thumbnail fetch failed, retrying...', err);
+        }
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
-
       localStorage.setItem(key, url);
       return url;
     }
 
-    // must appear before init()
     async function fetchGames() {
       const res = await fetch(
         proxy('https://games.roblox.com/v2/users/1914390459/games?accessFilter=Public&limit=10'),
@@ -294,8 +275,26 @@
       return res.json();
     }
 
+    async function fetchGameDetails(pid) {
+      const res = await fetch(proxy(
+        `https://games.roblox.com/v1/games/multiget-place-details?placeIds=${pid}`
+      ), { cache: 'no-store' });
+      if (!res.ok) throw new Error('Details HTTP ' + res.status);
+      const data = await res.json();
+      return data.data?.[0];
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
     function createCard(game) {
-      const card = document.createElement('div'); card.className = 'card visible';
+      const card = document.createElement('div'); card.className = 'card';
       const inner = document.createElement('div'); inner.className = 'inner';
       inner.addEventListener('mousemove', e => {
         const r = inner.getBoundingClientRect();
@@ -306,7 +305,9 @@
       inner.addEventListener('mouseleave', () => inner.style.transform = '');
 
       const img = document.createElement('img'); img.src = 'loading.png'; img.classList.add('loading'); inner.appendChild(img);
-      fetchThumbnail(game.rootPlace.id).then(src => { img.src = src; img.classList.remove('loading'); }).catch(() => { img.src = 'placeholder.png'; img.classList.remove('loading'); });
+      fetchThumbnail(game.rootPlace.id)
+        .then(src => { img.src = src; img.classList.remove('loading'); })
+        .catch(() => { img.src = 'placeholder.png'; img.classList.remove('loading'); });
 
       const info = document.createElement('div'); info.className = 'info';
       const { emoji, text } = (() => {
@@ -323,14 +324,33 @@
         <div class="timeframe highlight">${emoji} ${text}</div>
       `;
       const playBtn = document.createElement('a'); playBtn.href = `roblox://placeId=${game.rootPlace.id}`; playBtn.className = 'btn'; playBtn.textContent = 'Play'; info.appendChild(playBtn);
-      inner.appendChild(info); card.appendChild(inner); return card;
+      inner.appendChild(info); card.appendChild(inner);
+      return card;
     }
+
     async function init() {
+      const featuredGrid = document.getElementById('featured-grid');
+      for (const id of featuredIds) {
+        try {
+          const game = await fetchGameDetails(id);
+          const card = createCard(game);
+          featuredGrid.appendChild(card);
+          observer.observe(card);
+        } catch (e) {
+          console.warn('Featured fetch failed', e);
+        }
+      }
+
       const grid = document.getElementById('grid');
       try {
         const { data } = await fetchGames();
-        (data || []).slice(0, 4).forEach(g => grid.appendChild(createCard(g)));
+        data.slice(0, 4).forEach(g => {
+          const card = createCard(g);
+          grid.appendChild(card);
+          observer.observe(card);
+        });
       } catch (e) { console.error(e); }
+
       const copyBtn = document.getElementById('copyBtn'), copyLabel = document.getElementById('copyLabel');
       copyBtn.addEventListener('click', async e => {
         e.preventDefault();
